@@ -9,7 +9,7 @@ var server = new webpackDevServer(compiler, {
     noInfo: false,
     stats: { colors: true },
 });
-server.listen(3334);
+server.listen(3333);
 console.log('******************************************');
 console.log('***  server start on localhost:3333    ***');
 console.log('******************************************');
