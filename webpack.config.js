@@ -46,7 +46,9 @@ const vueCssLoaders = function (options) {
     css: generateLoaders(),
     postcss: generateLoaders(),
     less: generateLoaders('less'),
-    sass: generateLoaders('sass', { indentedSyntax: true }),
+    sass: generateLoaders('sass', {
+      indentedSyntax: true
+    }),
     scss: generateLoaders('sass'),
     stylus: generateLoaders('stylus'),
     styl: generateLoaders('stylus')
@@ -79,8 +81,7 @@ let config = {
   },
 
   module: {
-    loaders: [
-      {
+    rules: [{
         test: /\.css$/,
         loader: ExtractTextPlugin.extract({
           fallback: 'style-loader',
@@ -94,12 +95,17 @@ let config = {
           use: [isProduction ? 'css-loader?minimize' : 'css-loader', 'sass-loader']
         })
       },
-      { test: /\.tsx?$/, loader: "ts-loader" },
-      { test: /\.tpl$/, loader: "handlebars-loader?helperDirs[]=" + __dirname + "/helpers" },
+      {
+        test: /\.tsx?$/,
+        loader: "ts-loader"
+      },
+      {
+        test: /\.tpl$/,
+        loader: "handlebars-loader?helperDirs[]=" + __dirname + "/helpers"
+      },
       {
         test: /\.md$/,
-        use: [
-          {
+        use: [{
             loader: "html-loader"
           },
           {
@@ -160,11 +166,11 @@ let config = {
     }),
     new ExtractTextPlugin("[name].css"),
   ] : [
-      new webpack.DefinePlugin({
-        'process.env.NODE_ENV': JSON.stringify(env),
-      }),
-      new ExtractTextPlugin("[name].css"),
-    ],
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify(env),
+    }),
+    new ExtractTextPlugin("[name].css"),
+  ],
 };
 
 module.exports = config;
