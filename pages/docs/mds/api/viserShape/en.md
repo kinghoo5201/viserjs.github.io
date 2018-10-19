@@ -75,6 +75,6 @@ Whether it is polar coordinates. If it is polar coordinates, the method will aut
 
 - Description: The size of the shape, the different shape has different meaning, range of data is 0 to 1.
 
-# 案例
+# Case
 
 You can view other charts in the demo Center - > fillet stacked bar graph. There are many cases.
