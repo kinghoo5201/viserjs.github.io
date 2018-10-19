@@ -69,7 +69,7 @@ Code example：
 <Chart forceFit height={400} data={data} scale={scale}>
   <Tooltip showTitle={false} onChange={(ev, chart) => {
     const item = ev.items[0]; // get tooltip content
-    item.value = '格式化-' + (item.value * 100).toFixed(2) + '%';
+    item.value = 'format-' + (item.value * 100).toFixed(2) + '%';
   }}/>
   <Coord type="theta" />
   <Axis />

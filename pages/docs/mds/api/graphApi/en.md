@@ -219,10 +219,10 @@ var graph = new G6.Graph({
 
 #### layout
 
-布局参数 {object|function}
-详见方法中的 layouts
+Layout parameters {object|function}
+See the details from the method of Layouts
 
-#### 事件
+#### Event
 
 ```javascript
 const graph = {
@@ -235,44 +235,44 @@ const graph = {
 ```
 
 ```
-  onClick?: func; 鼠标单击
-  onAfterchange?: func; 数据改变后
-  onMousedown?: func; 鼠标按下
-  onMousemove?: func; 鼠标移动
-  onMouseleave?: func; 鼠标离开画布区域
-  onMouseup?: func; 鼠标抬起
-  onDblclick?: func; 鼠标双击
-  onTouchstart?: func; 手指触摸
-  onTouchmove?: func; 手指移动
-  onTouchend?: func; 手指离开
-  onPlotenter?: func; 进入图表时
-  onPlotmove?: func; 在图表上移动时
-  onPlotleave?: func; 从图表离开时
-  onPlotclick?: func; 单击图表时
-  onPlotdblclick?: func; 双击图表时
-  onDragstart?: func; 开始拖动时
-  onDrag?: func; 拖动中
-  onDragend?: func; 拖动结束时
+  onClick?: func; mouse click
+  onAfterchange?: func; After data change
+  onMousedown?: func; mouse down
+  onMousemove?: func; mouse click
+  onMouseleave?: func; mouse leaves the canvas area.
+  onMouseup?: func; mouse up
+  onDblclick?: func; mouse double click
+  onTouchstart?: func; finger touch
+  onTouchmove?: func; finger move
+  onTouchend?: func; finger leave
+  onPlotenter?: func; when entering charts
+  onPlotmove?: func; when moving on the chart
+  onPlotleave?: func; when leaving from the chart
+  onPlotclick?: func; when click the chart
+  onPlotdblclick?: func; when double click the chart
+  onDragstart?: func; when dragging starts
+  onDrag?: func; dragging
+  onDragend?: func; when dragging end
 ```
 
-#### 事件回调函数参数
+#### Event callback function parameters
 
-ev: dom 节点相关信息
-graph: 配置参数相关信息
+ev: dom , Node related information
+graph: Configuration parameter related information
 
-### zoom 画布缩放
+### zoom Canvas scaling
 
 #### min?: number;
 
-最小缩放比率
+Minimum zoom ratio
 
 #### max?: number;
 
-最大缩放比率
+Maximum zoom ratio
 
 #### current?: number;
 
-当前缩放比率
+current zoom ratio
 
 ```javascript
 const zoom = {
@@ -300,19 +300,19 @@ export default class App extends React.Component {
 
 #### shape?: string;
 
-节点形状
+the shape of node
 
 #### size?: number;
 
-节点大小
+the size of node
 
 #### label?: (obj: any) => {};
 
-节点文本
+the label of node
 
 #### style?: any;
 
-节点样式
+the style of node
 
 ```javascript
 const node = {
@@ -344,9 +344,9 @@ export default class App extends React.Component {
 
 ### Edge
 
-#### shape?: string;边形状
+#### shape?: string;Edge shape
 
-#### style?: any;边样式
+#### style?: any;Edge style
 
 ```javascript
 const edge = {
@@ -371,4 +371,4 @@ export default class App extends React.Component {
 }
 ```
 
-详细可见： https://antv.alipay.com/zh-cn/g6/1.x/api/graph.html
+It can be seen in detail: https://antv.alipay.com/zh-cn/g6/1.x/api/graph.html
