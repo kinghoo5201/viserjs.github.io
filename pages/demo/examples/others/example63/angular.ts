@@ -1,157 +1,78 @@
 import 'zone.js';
 import 'reflect-metadata';
-import { Component, NgModule } from '@angular/core';
+import { Component, enableProdMode, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { ViserModule ,registerShape} from 'viser-ng';
+import { ViserModule } from 'viser-ng';
+const DataSet = require('@antv/data-set');
 
-const data = [{
-  type: '分类一',
-  value: 20
-}, {
-  type: '分类二',
-  value: 18
-}, {
-  type: '分类三',
-  value: 32
-}, {
-  type: '分类四',
-  value: 15
-}, {
-  type: 'Other',
-  value: 15
-}];
+const data = [
+  {year: '2000','类型 A':21.0 ,'类型 B':16 ,'类型 C': 8},
+  {year: '2001','类型 A':25.0 ,'类型 B':16 ,'类型 C': 8},
+  {year: '2002','类型 A':25.0 ,'类型 B':15 ,'类型 C': 8},
+  {year: '2003','类型 A':25.0 ,'类型 B':14 ,'类型 C': 7},
+  {year: '2004','类型 A':25.0 ,'类型 B':14 ,'类型 C': 7},
+  {year: '2005','类型 A':24.0 ,'类型 B':13 ,'类型 C': 8},
+  {year: '2006','类型 A':24.0 ,'类型 B':14 ,'类型 C': 7},
+  {year: '2007','类型 A':26.0 ,'类型 B':16 ,'类型 C': 7},
+  {year: '2008','类型 A':26.0 ,'类型 B':15.2 ,'类型 C': 8},
+  {year: '2009','类型 A':27.1 ,'类型 B':15.2 ,'类型 C': 10},
+  {year: '2010','类型 A':27.5 ,'类型 B':15.4 ,'类型 C': 8},
+  {year: '2011','类型 A':26.4 ,'类型 B':15.2 ,'类型 C': 9},
+  {year: '2012','类型 A':28.8 ,'类型 B':15.4 ,'类型 C': 9},
+  {year: '2013','类型 A':33.3 ,'类型 B':16.7 ,'类型 C': 12},
+  {year: '2014','类型 A':38.2 ,'类型 B':19.5 ,'类型 C': 18}
+];
 
-let sum = 0;
-data.forEach(function(obj) {
-  sum += obj.value;
+const dv = new DataSet.View().source(data).transform({
+  type: 'fold',
+  fields: ['类型 A', '类型 B', '类型 C'],
+  key: '难民类型',
+  value: 'count',
+  remains: 'year'
 });
-const chartWidth = window.innerWidth-740;
-const chartHeight = 500;
-const others = [{
-  otherType: 'Other1',
-  value: 2
-}, {
-  otherType: 'Other2',
-  value: 3
-}, {
-  otherType: 'Other3',
-  value: 5
-}, {
-  otherType: 'Other4',
-  value: 2
-}, {
-  otherType: 'Other5',
-  value: 3
-}];
 
-registerShape('interval', 'otherShape', {
-  draw: function draw(cfg, container) {
-    const points = cfg.points;
-    let path = [];
-    path.push(['M', points[0].x, points[0].y]);
-    path.push(['L', points[1].x, points[1].y]);
-    path.push(['L', points[2].x, points[2].y]);
-    path.push(['L', points[3].x, points[3].y]);
-    path.push('Z');
-    
-    path = this.parsePath(path);
-    // 将点转换成画布上的点
-    const parsePoints = this.parsePoints(points);
-    const linePath = [['M', parsePoints[3].x, parsePoints[3].y], ['L', chartWidth * 0.7, 20], ['M', parsePoints[2].x, parsePoints[2].y], ['L', chartWidth * 0.7, chartHeight - 70]];
-    // 绘制线
-    container.addShape('path', {
-      attrs: {
-        path: linePath,
-        stroke: cfg.color,
-        lineWidth: 1
-      }
-    });
-    return container.addShape('path', {
-      attrs: {
-        fill: cfg.color,
-        path: path
-      }
-    });
+const stackInterval1Opts = {
+  position: 'year*count',
+  color: '难民类型',
+  style: {
+    lineWidth: 1,
+    stroke: '#fff'
   }
-});
+};
 
 @Component({
   selector: '#mount',
   template: `
-    <div>
-      <v-chart [forceFit]="true" [width]="chartWidth" [height]="chartHeight" [padding]="[20,0,'auto',0]">
-        <v-legend dataKey="type"></v-legend>
-        <v-tooltip></v-tooltip>
-        <v-view
-          [start]="{x:0,y:0}"
-          [end]="{x:0.5,y:1}"
-          [data]="data"
-        >
-          <v-coord
-            type="theta"
-            startAngle="-333"
-            endAngle="27"
-          ></v-coord>
-          <v-stack-interval
-              position="value"
-              color="type"
-              [shape]="intervalShape"
-              [label]="intervalLabel"
-            >
-          </v-stack-interval>
-        </v-view>
-        <v-view
-          [start]="{x:.6,y:0}"
-          [end]="{x:1,y:1}"
-          [data]="others"
-          [scale]="scale"
-        >
-          <v-stack-bar
-            position="1*value"
-            [color]="['otherType','#fcd7de-#f04864']"
-            [label]="['otherType',{offset:-20}]"
-          >
-          </v-stack-bar>
-        </v-view>
-      </v-chart>
-    </div>
-  `,
+  <div>
+    <v-chart [forceFit]="forceFit" [height]="height" [padding]="80" [data]="dv">
+      <v-coord type="polar" [innerRadius]="0.1"></v-coord>
+      <v-axis dataKey="percent" [title]="{offset: 40, text: '百分比'}"></v-axis>
+      <v-legend dataKey="难民类型" position="bottom"></v-legend>
+      <v-stack-interval [position]="stackInterval1Opts.position" [color]="stackInterval1Opts.color"
+        [style]="stackInterval1Opts.style"></v-stack-interval>
+    </v-chart>
+  </div>
+  `
 })
 class AppComponent {
-  chartHeight:number=chartHeight; 
-  chartWidth:number=chartWidth;
-  data:any=data;
-  others:any=others;
-  intervalShape:any=[
-    'type',
-    type=>{
-      if(type==='other'){
-        return 'otherShape'
-      }
-      return 'rect';
-    }
-  ];
-  intervalLabel:any=[
-    'type',
-    {
-      offset:-20,
-      textStyle:{
-        rotate:0
-      }
-    }
-  ];
-  scale:any=[
-    {
-      dataKey:'value',
-      nice:false
-    }
-  ]
+  forceFit: boolean = true;
+  height: number = 400;
+  dv = dv;
+  stackInterval1Opts = stackInterval1Opts;
 }
 
 @NgModule({
-  declarations: [AppComponent],
-  imports: [BrowserModule, ViserModule],
+  declarations: [
+    AppComponent
+  ],
+  imports: [
+    BrowserModule,
+    ViserModule
+  ],
   providers: [],
-  bootstrap: [AppComponent],
+  bootstrap: [
+    AppComponent
+  ]
 })
-export default class AppModule {}
+export default class AppModule { }
+

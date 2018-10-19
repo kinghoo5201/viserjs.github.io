@@ -1,114 +1,120 @@
-import { Chart, Axis, Tooltip, Coord, Interval, Legend, Guide } from 'viser-react';
+import { Chart, View, Tooltip, Coord, StackInterval, Guide } from 'viser-react';
 import * as React from 'react';
-import * as $ from 'jquery';
+import * as _ from 'lodash';
 const DataSet = require('@antv/data-set');
 
-const scale = [{
-  dataKey: 'date',
-  type: 'cat',
-}, {
-  dataKey: 'range',
-  max: 30,
-  min: -25,
-}, {
-  dataKey: 'mean_temp',
-  alias: 'Average Daily Temperature',
-}];
+const text = [ 'MIDNIGHT', '3 AM', '6 AM', '9 AM', 'NOON', '3 PM', '6 PM', '9 PM' ];
+const data = [];
+for (let i = 0; i < 24; i++) {
+  const item = {} as any;
+  item.type = i + '';
+  item.value = 10;
+  data.push(item);
+}
 
-const legendOpt = {
-  offset: 25,
-  title: {
-    fontSize: 12,
-    fill: '#4F4F4F',
-    fontWeight: 300,
-    textAlign: 'start'
+const dv = new DataSet.View().source(data).transform({
+  type: 'percent',
+  field: 'value',
+  dimension: 'type',
+  as: 'percent'
+});
+
+const stackInterval1Opts = {
+  position: 'percent',
+  color: ['type', ['rgba(255, 255, 255, 0)']],
+  style: {
+    stroke: '#444',
+    lineWidth: 1
   },
-  slidable: false,
-  position: 'bottom' as any,
-  offsetX: 25,
+  tooltip: false,
+  select: false,
 };
 
-const guideLineOpt = {
-  start: {
-    date: 'min',
-    range: 'min'
-  },
-  end: {
-    date: 'min',
-    range: 'max'
-  },
-  lineStyle: {
-    stroke: '#aaa',
-    lineWidth: 1,
-    lineDash: null
-  },
-  text: {
-    position: 1 as any,
-    offsetY: -6,
-    autoRotate: false,
-    style: {
-      fontSize: 16,
-      textAlign: 'center',
-      fontWeight: 100,
-      fill: '#aaa'
-    },
-    content: 'January'
+const stackInterval2Opts = {
+  position: 'type*value',
+  size: ['type', function(val) {
+    if (val % 3 === 0) {
+      return 4;
+    } else {
+      return 0;
+    }
+  }],
+  color: '#444',
+  tooltip: false,
+  label: ['type', function(val) {
+    if (val % 3 === 0) {
+      return text[val / 3];
+    }
+    return '';
+  }, {
+    offset: 15,
+    textStyle: {
+      fontSize: 12,
+      fontWeight: 'bold',
+      fill: '#bfbfbf'
+    }
+  }]
+};
+
+const userData = [
+  { type: '睡眠', value: 70 },
+  { type: '淡茶 & 烟斗 & 冥想', value: 10 },
+  { type: '写作', value: 10 },
+  { type: '教课', value: 40 },
+  { type: '酒吧吃肉配白酒', value: 40 },
+  { type: '散步', value: 10 },
+  { type: '拜访马大大', value: 30 },
+  { type: '阅读', value: 30 },
+];
+
+const userDv = new DataSet.View().source(userData).transform({
+  type: 'percent',
+  field: 'value',
+  dimension: 'type',
+  as: 'percent'
+});
+
+const userScale = [{
+  dataKey: 'percent',
+  formatter: (val: any) => {
+    return (val * 100).toFixed(2) + '%';
   }
+}];
+
+const stackInterval3Opts = {
+  position: 'percent',
+  color: 'type',
+  label: ['type', {
+    offset: 40,
+  }],
+  select: false,
 };
 
 export default class App extends React.Component {
-  state = {
-    data: [],
-  };
-
-  componentDidMount() {
-    $.getJSON('/assets/data/daily-temp-in-boston.json', (data) => {
-      const ds = new DataSet();
-      const dv = ds.createView()
-      .source(data)
-      .transform({
-        type: 'map',
-        callback(row) {
-          row.range = [row.min_temp, row.max_temp];
-          return row;
-        }
-      });
-      this.setState({ data: dv });
-    });
-  }
-
   render() {
-    const { data } = this.state;
-    const color = ['mean_temp', 'rgb(44, 123, 182)-rgb(0, 166, 202)-rgb(0, 204, 188)-rgb(144, 235, 157)-rgb(255, 255, 140)-rgb(249, 208, 87)-rgb(242, 158, 46)-rgb(231, 104, 24)-rgb(215, 25, 28)'];
-
     return (
       <div>
-        <Chart forceFit height={400} padding={[ 20, 0, 105 ]} data={data} scale={scale}>
-          <Legend {...legendOpt} />
-          <Tooltip />
-          <Coord type="polar" innerRadius={0.35} />
-          <Axis dataKey="date" show={false} />
-          <Axis dataKey="range" line={null} tickLine={null} label={null} />
-          <Interval position="date*range" color={color} size={2.5} opacity={1} />
-          <Guide type="line" {...guideLineOpt} />
-          {
-            [ -20, -10, 0, 10, 20, 30 ].map((entry, i) => {
-              const start = {
-                date: '2015-7-1',
-                range: entry,
-              };
-
-              return (
-                <Guide type="text" key={i} start={start} content={`${entry}°C`} style={{
-                  fill: '#C4C4C4',
-                  fontSize: 12,
-                  fontWeight: 100,
-                  textAlign: 'center',
-                  textBaseline: 'middle'
-                }} />
-              )
-            })
-          }
+        <Chart forceFit height={400} padding={80}>
+          <Tooltip showTitle={false} />
+          <View data={dv}>
+            <Coord type="theta" innerRadius={0.9} />
+            <StackInterval {...stackInterval1Opts} />
+            <Guide type="text" position={[ '50%', '50%' ]} content="24 hours"
+              style={{
+                lineHeight: 240,
+                fontSize: '30',
+                fill: '#262626',
+                textAlign: 'center'}}
+            />
+          </View>
+          <View data={dv}>
+            <Coord type="polar" innerRadius={0.9} />
+            <StackInterval {...stackInterval2Opts} />
+          </View>
+          <View data={userDv} scale={userScale}>
+            <Coord type="theta" innerRadius={0.75} />
+            <StackInterval {...stackInterval3Opts} />
+          </View>
         </Chart>
       </div>
     );

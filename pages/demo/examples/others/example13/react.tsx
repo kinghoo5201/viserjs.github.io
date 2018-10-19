@@ -1,65 +1,84 @@
-import { Chart, Axis, Legend, Tooltip, Coord, Interval } from 'viser-react';
+import { registerShape, Chart, Axis, Tooltip, Series } from 'viser-react';
 import * as React from 'react';
+import * as $ from 'jquery';
 import * as _ from 'lodash';
-const data = [{country:'中国',cost:96},{country:'德国',cost:121},{country:'美国',cost:100},{country:'日本',cost:111},{country:'韩国',cost:102},{country:'法国',cost:124},{country:'意大利',cost:123},{country:'荷兰',cost:111},{country:'比利时',cost:123},{country:'英国',cost:109},{country:'加拿大',cost:115},{country:'俄罗斯',cost:99},{country:'墨西哥',cost:91},{country:'印度',cost:87},{country:'瑞士',cost:125},{country:'澳大利亚',cost:130},{country:'西班牙',cost:109},{country:'巴西',cost:123},{country:'泰国',cost:91},{country:'印尼',cost:83},{country:'波兰',cost:101},{country:'瑞典',cost:116},{country:'奥地利',cost:111},{country:'捷克',cost:107}];
+
+registerShape('point', 'image', {
+  drawShape: function(cfg: any, container: any) {
+    cfg.points = this.parsePoints(cfg.points);
+    const coord = this._coord;
+    container.addShape('line', {
+      attrs: {
+        x1: cfg.points[0].x,
+        y1: cfg.points[0].y,
+        x2: cfg.points[0].x,
+        y2: coord.start.y,
+        stroke: '#ccc',
+        lineWidth: 1,
+        lineDash: [4, 2]
+      }
+    });
+    return container.addShape('image', {
+      attrs: {
+        x: cfg.points[0].x - (12 * cfg.size / 2),
+        y: cfg.points[0].y - 12 * cfg.size,
+        width: 12 * cfg.size,
+        height: 12 * cfg.size,
+        img: cfg.shape[1]
+      }
+    });
+  }
+});
+
+const data = [
+  {name: 'Internet Explorer', value: 26},
+  {name: 'Chrome', value: 40},
+  {name: 'Firefox', value: 30},
+  {name: 'Safari',  value: 24},
+  {name: 'Opera', value: 15},
+  {name: 'Undetectable', value: 8}
+];
+
+const imageMap = {
+  'Internet Explorer': 'https://gw.alipayobjects.com/zos/rmsportal/eOYRaLPOmkieVvjyjTzM.png',
+  'Chrome': 'https://gw.alipayobjects.com/zos/rmsportal/dWJWRLWfpOEbwCyxmZwu.png',
+  'Firefox': 'https://gw.alipayobjects.com/zos/rmsportal/ZEPeDluKmAoTioCABBTc.png',
+  'Safari': 'https://gw.alipayobjects.com/zos/rmsportal/eZYhlLzqWLAYwOHQAXmc.png',
+  'Opera': 'https://gw.alipayobjects.com/zos/rmsportal/vXiGOWCGZNKuVVpVYQAw.png',
+  'Undetectable': 'https://gw.alipayobjects.com/zos/rmsportal/NjApYXminrnhBgOXyuaK.png'
+};
 
 const scale = [{
-  dataKey: 'cost',
-  min: 0,
+  dataKey: 'value',
+  nice: false,
+  max: 60,
+  min: 0
 }];
 
-const axis1Opts = {
-  dataKey: 'cost',
-  label: null,
-  tickLine: null,
-  line: {
-    stroke: '#E9E9E9',
-    lineDash: [ 3, 3 ]
-  }
-};
-const axis2Opts = {
-  dataKey: 'country',
-  grid: {
-    align: 'center'
-  },
-  tickLine: null,
-  label: {
-    Offset: 10,
-    textStyle: {
-      textAlign: 'center' // 设置坐标轴 label 的文本对齐方向
-    }
-  }
-};
-
-const interval1Opts = {
-  position: 'country*cost',
-  color: 'country',
-  label: ['cost', {
-    offset: -15,
-    textStyle: {
-      textAlign: 'center',
-      fontSize: 11,
-      shadowBlur: 2,
-      shadowColor: 'rgba(0, 0, 0, .45)'
-    }
+const seriesOpts = {
+  gemo: 'point',
+  position: 'name*value',
+  size: 'value',
+  color: 'name',
+  shape: ['name', function(name){
+    return ['image', imageMap[name]];
   }],
-  style: {
-    lineWidth: 1,
-    stroke: '#fff',
-  },
+  label: ['value', {
+    offset: -20,
+    textStyle: {
+      fontSize:16, // 文本大小
+    }
+  }]
 };
 
 export default class App extends React.Component {
   render() {
     return (
       <div>
-        <Chart forceFit height={400} padding={[ 40, 40, 130, 40 ]} data={data} scale={scale}>
-          <Coord type="polar" />
-          <Axis {...axis1Opts} />
-          <Axis {...axis2Opts} />
-          <Legend dataKey="country" itemWidth={50} />
-          <Axis dataKey="percent" title={{ offset: 40, text: '百分比'}} />
-          <Interval {...interval1Opts} />
+        <Chart forceFit height={400} data={data} scale={scale}>
+          <Tooltip />
+          <Axis dataKey="value" show={false} />
+          <Series {...seriesOpts} />
         </Chart>
       </div>
     );

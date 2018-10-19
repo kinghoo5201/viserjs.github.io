@@ -1,47 +1,77 @@
 <template>
-  <div>
-    <v-chart :forceFit="true" :height="500" padding="0"
-      :scale="[
-        { dataKey: 'longitude', max: -66, min: -125, },
-        { dataKey: 'latitude', max: 50, min: 24,}
-      ]"
-    >
-      <v-view :data="dv">
-        <v-polygon position="longitude*latitude"
-          color="#ddd"
-          :v-style="{ stroke: '#666', lineWidth: 1 }"
-        />
-      </v-view>
-      <v-view :data="airports.slice(1,100)">
-        <v-point position="longitude*latitude"
-          :shape="['iata', () => ['path', 'M15 0C6.716 0 0 6.656 0 14.866c0 8.211 15 35.135 15 35.135s15-26.924 15-35.135C30 6.656 23.284 0 15 0zm-.049 19.312c-2.557 0-4.629-2.055-4.629-4.588 0-2.535 2.072-4.589 4.629-4.589 2.559 0 4.631 2.054 4.631 4.589 0 2.533-2.072 4.588-4.631 4.588z']]"
-          size="40"
-          color="#666"
-        />
-      </v-view>
-    </v-chart>
-  </div>
+    <div>
+        <v-chart :forceFit="true" height="400" :data="data" >
+            <v-tooltip></v-tooltip>
+            <v-legend dataKey="type"></v-legend>
+            <v-coord type="theta" :radius="0.8"></v-coord>
+            <v-pie position="value" color="type" shape="sliceShape" label="type"></v-pie>
+        </v-chart>
+    </div>
 </template>
 
 <script>
+const data = [
+  {
+    type: "分类一",
+    value: 27
+  },
+  {
+    type: "分类二",
+    value: 25
+  },
+  {
+    type: "分类三",
+    value: 18
+  },
+  {
+    type: "分类四",
+    value: 15
+  },
+  {
+    type: "分类五",
+    value: 10
+  },
+  {
+    type: "Other",
+    value: 5
+  }
+];
+
+let max = 0;
+data.forEach(function(obj) {
+  if (obj.value > max) {
+    max = obj.value;
+  }
+});
+// 自定义 other 的图形，增加两条线
+ViserVue.registerShape("interval", "sliceShape", {
+  draw: function draw(cfg, container) {
+    var points = cfg.points;
+    var origin = cfg.origin._origin;
+    var percent = origin.value / max;
+    var xWidth = points[2].x - points[1].x;
+    var width = xWidth * percent;
+    var path = [];
+    path.push(["M", points[0].x, points[0].y]);
+    path.push(["L", points[1].x, points[1].y]);
+    path.push(["L", points[0].x + width, points[2].y]);
+    path.push(["L", points[0].x + width, points[3].y]);
+    path.push("Z");
+    path = this.parsePath(path);
+    return container.addShape("path", {
+      attrs: {
+        fill: cfg.color,
+        path: path
+      }
+    });
+  }
+});
 
 export default {
-  mounted() {
-    $.getJSON('/assets/data/usa.geo.json', (data) => {
-      $.getJSON('/assets/data/airport-1.json', (airports) => {
-        const dv = new DataSet.View().source(data).source(data, {
-          type: "GeoJSON"
-        });
-        this.$data.dv = dv;
-        this.$data.airports = airports;
-      });
-    });
-  },
   data() {
-  return {
-    dv: {},
-    airports: []
-  };
+    return {
+      data: data
+    };
   }
 };
 </script>

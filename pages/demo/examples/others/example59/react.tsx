@@ -1,30 +1,32 @@
-import { Chart, Venn } from 'viser-react';
 import * as React from 'react';
-
-var data = [{"sets":["A"],"size":12,"label":"A"},{"sets":["B"],"size":12,"label":"B"},{"sets":["C"],"size":12,"label":"C"},{"sets":["A","B"],"size":2,"label":"A&B"},{"sets":["A","C"],"size":2,"label":"A&C"},{"sets":["B","C"],"size":2,"label":"B&C"},{"sets":["A","B","C"],"size":1}];
+import * as $ from 'jquery';
+import { Chart, Axis, Legend, Polygon } from 'viser-react';
+const DataSet = require('@antv/data-set');
 
 export default class App extends React.Component {
+  state = {
+    dv: {},
+  };
+  componentDidMount() {
+    $.getJSON('/assets/data/gaussion-distribution.json', data => {
+      const dv = new DataSet.View().source(data);
+      dv.transform({
+        sizeByCount: true, // calculate bin size by binning count
+        type: 'bin.rectangle',
+        fields: ['x', 'y'], // 对应坐标轴上的一个点
+        bins: [20, 10],
+      });
+      this.setState({  dv });
+    });
+  }
   render() {
+    const { dv } = this.state;
     return (
-      <div>
-        <Chart forceFit height={600} data={data}>
-          <Venn
-            label="sets"
-            size="size"
-            color="id"
-            active={false}
-            shape="hollow"
-            style={{
-              lineWidth: 10,
-              padding: 10,
-              textStyle: {
-                textAlign: 'center',
-                fontSize: 32,
-              },
-            }}
-          />
-        </Chart>
-      </div>
+      <Chart forceFit={true} height={500} data={dv}>
+        <Axis />
+        <Legend  />
+        <Polygon position="x*y" color={['count', '#BAE7FF-#1890FF-#0050B3']} />
+      </Chart>
     );
   }
 }

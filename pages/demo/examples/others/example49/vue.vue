@@ -1,111 +1,80 @@
 <template>
-    <div v-if="data.length">
-        <div id="mountNode">
-            <h4 style="text-align:center;margin-bottom:5px;">北京市 2010-2015 年 AQI 指数</h4>
-            <v-chart :forceFit="true" height="400" :padding="[20,20,40,80]" :data="dv" :scale="scale">
-                <v-tooltip></v-tooltip>
-                <v-axis></v-axis>
-                <v-line position="date*aqi" opacity="0.75"></v-line>
-                <v-guide v-for="(tick,i) in ticks" :key="i" type="region" :start="['min',tick]" :end="['max',ticks[i+1]]" :v-style="{fill:colors[i],fillOpacity:0.4}"></v-guide>
-            </v-chart>
-        </div>
-        <div id="slider">
-            <v-plugin>
-                <v-slider
-                    width="auto"
-                    height="26"
-                    :start="start"
-                    :end="end"
-                    xAxis="date"
-                    yAxis="aqi"
-                    :scale="{
-                        time:{
-                            type:'time',
-                            tickCount:10,
-                            mask:'YYYY-MM-DD'
-                        }
-                    }"
-                    :data="data"
-                    :backgroundChart="{type:'line'}"
-                    :onChange="onChange"
-                ></v-slider>
-            </v-plugin>
-        </div>
+    <div>
+        <v-chart :forceFit="true" height="400" :data="data" :padding="[40,0]">
+            <v-tooltip></v-tooltip>
+            <v-legend dataKey="type"></v-legend>
+            <v-coord type="theta"></v-coord>
+            <v-stack-interval position="value" color="type" shape="platelet" label="type"></v-stack-interval>
+        </v-chart>
     </div>
 </template>
 
 <script>
+const data = [{
+    type: '分类一',
+    value: 27
+}, {
+    type: '分类二',
+    value: 25
+}, {
+    type: '分类三',
+    value: 18
+}, {
+    type: '分类四',
+    value: 15
+}, {
+    type: '分类五',
+    value: 10
+}, {
+    type: 'Other',
+    value: 5
+}];
+
+// 根据比例，获取两点之间的点
+function getPoint(p0, p1, ratio) {
+    return {
+        x: (1 - ratio) * p0.x + ratio * p1.x,
+        y: (1 - ratio) * p0.y + ratio * p1.y
+    };
+}
+
+const pointRatio = 0.7; // 设置开始变成圆弧的位置 0.7
+// 可以通过调整这个数值控制分割空白处的间距，0-1 之间的数值
+const sliceNumber = 0.005;
+
+// 自定义 other 的图形，增加两条线
+ViserVue.registerShape('interval', 'platelet', {
+    draw: function draw(cfg, container) {
+        cfg.points[1].y = cfg.points[1].y - sliceNumber;
+        cfg.points[2].y = cfg.points[2].y - sliceNumber;
+        let centerPoint = {
+            x: cfg.points[3].x,
+            y: (cfg.points[2].y + cfg.points[3].y) / 2
+        };
+        centerPoint = this.parsePoint(centerPoint);
+        const points = this.parsePoints(cfg.points);
+        const path = [];
+        const tmpPoint1 = getPoint(points[0], points[3], pointRatio);
+        const tmpPoint2 = getPoint(points[1], points[2], pointRatio);
+        path.push(['M', points[0].x, points[0].y]);
+        path.push(['L', tmpPoint1.x, tmpPoint1.y]);
+        path.push(['Q', points[3].x, points[3].y, centerPoint.x, centerPoint.y]);
+        path.push(['Q', points[2].x, points[2].y, tmpPoint2.x, tmpPoint2.y]);
+        path.push(['L', points[1].x, points[1].y]);
+        path.push(['z']);
+        return container.addShape('path', {
+            attrs: {
+                fill: cfg.color,
+                path: path
+            }
+        });
+    }
+});
 
 export default {
-  mounted() {
-    $.getJSON('/assets/data/peking-aqi.json', (data) => {
-      const ticks = [0, 50, 100, 150, 200, 300, 500];
-      const colors = [
-        "#5AC405",
-        "#F9C709",
-        "#FD942C",
-        "#e4440D",
-        "#810043",
-        "#45001B"
-      ];
-      this.$data.data = data;
-      this.$data.dv = this.getData();
-      this.$data.ticks = ticks;
-      this.$data.colors = colors;
-      this.$data.scale = [
-        {
-          dataKey: "date",
-          type: "time",
-          mask: "YYYY-MM-DD",
-          tickCount: 4,
-          alias: "日期",
-          nice: false
-        },
-        {
-          dataKey: "aqi",
-          min: 0,
-          ticks: ticks,
-          alias: "AQI(空气质量指数)"
-        }
-      ];
-    });
-  },
-  methods: {
-    getData() {
-      const { data, start, end } = this;
-      const ds = new DataSet({
-        state: {
-          start: new Date(start).getTime(),
-          end: new Date(end).getTime()
-        }
-      });
-      const dv = ds.createView().source(data);
-      dv.transform({
-        type: "filter",
-        callback: function callback(obj) {
-          var time = new Date(obj.date).getTime(); // !注意：时间格式，建议转换为时间戳进行比较
-          return time >= ds.state.start && time <= ds.state.end;
-        }
-      });
-      return dv;
-    },
-    onChange(_ref) {
-      const startValue = _ref.startValue,
-        endValue = _ref.endValue;
-      this.start = startValue;
-      this.end = endValue;
-      this.dv = this.getData();
-    }
-  },
   data() {
     return {
-      dv: {},
-      data: [],
-      ticks: [],
-      colors: [],
-      scale: [],
-      start: "2000-06-05",
-      end: "2000-12-29"
+      data: data
     };
   }
 };

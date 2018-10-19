@@ -1,96 +1,75 @@
 import 'zone.js';
 import 'reflect-metadata';
-import * as $ from 'jquery';
-import { Component, NgModule,Renderer,ViewChild} from '@angular/core';
+import { Component, enableProdMode, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { ViserModule } from 'viser-ng';
+import * as $ from 'jquery';
 
-let tempChart:any;
+const scale = [{
+  dataKey: 'type',
+  range: [0, 1]
+}];
+
+const axis1Opts = {
+  dataKey: 'clarity',
+  grid: {
+    align: 'center',
+    lineStyle: {
+      lineDash: [0, 0]
+    }
+  }
+};
+
+const jitterPointOpts = {
+  gemo: 'pointJitter',
+  position: 'clarity*type',
+  color: 'clarity',
+  shape: 'circle',
+  opacity: 0.65,
+};
 
 @Component({
   selector: '#mount',
   template: `
-    <div>
-      <v-chart
-        [forceFit]="true"
-        height="500"
-        #chart
-      >
-        <v-view
-          [data]="data"
-          [end]="{x:0.45,y:1}"
-        >
-          <v-axis></v-axis>
-          <v-point position="Horsepower*Miles_per_Gallon"></v-point>
-        </v-view>
-        <v-view
-          [data]="data"
-          [start]="{x:0.55,y:0}"
-        >
-          <v-axis></v-axis>
-          <v-point position="Acceleration*Displacement"></v-point>
-        </v-view>
-        <v-brush
-          [dragable]="true"
-          [onBrushstart]="onBrushstart"
-          [onBrushmove]="onBrushmove"
-          [onDragmove]="onBrushmove"
-        ></v-brush>
-      </v-chart>
-    </div>
-  `,
+  <div>
+    <v-chart [forceFit]="forceFit" [height]="height" [padding]="[ 40, 100, 80, 80 ]" [data]="data" [scale]="scale">
+      <v-tooltip></v-tooltip>
+      <v-coord type="polar"></v-coord>
+      <v-axis [dataKey]="axis1Opts.dataKey" [grid]="axis1Opts.grid"></v-axis>
+      <v-jitter-point [position]="jitterPointOpts.position" [color]="jitterPointOpts.color" [shape]="jitterPointOpts.shape" [opacity]="jitterPointOpts.opacity"></v-jitter-point>
+    </v-chart>
+  </div>
+  `
 })
 class AppComponent {
-  data:any=[];
-  @ViewChild('chart') chart:any;
-  constructor(private renderer:Renderer){
-    $.getJSON('/assets/data/cars.json',data=>{
-      this.data=data;
-    });
-  }
-  ngAfterViewInit(){
-    tempChart=this.chart;
-  }
-  onBrushstart(ev){
-    if(!tempChart){
-      return;
-    }
-    const x = ev.x,
-        y = ev.y,
-        chart=tempChart.context.chart.chartInstance;
-
-      const views = chart.getViewsByPoint({
-        x: x,
-        y: y
+  forceFit: boolean = true;
+  height: number = 400;
+  data = [];
+  scale = scale;
+  axis1Opts = axis1Opts;
+  jitterPointOpts = jitterPointOpts;
+  constructor() {
+    $.getJSON('/assets/data/diamond.json', (data) => {
+      data.forEach((obj: any) => {
+        obj.type = '1';
       });
-      if (views.length > 1) {
-        (this as any).chart = views[1];
-        const coord = views[1].get('coord');
-        (this as any).plot = {
-          start: coord.start,
-          end: coord.end
-        };
-        (this as any).xScale = views[1].getXScale();
-        (this as any).yScale = views[1].getYScales()[0];
-      }
-  };
-  onBrushmove(ev){
-    if(!tempChart){
-      return;
-    }
-    const data = ev.data;
-    const viewInstance=tempChart.context.chart.viewInstance;
-    const view2=viewInstance[Object.keys(viewInstance)[1]];
-    view2.filterShape(function(obj) {
-      return data.indexOf(obj) > -1;
+      this.data = data;
     });
   }
 }
 
 @NgModule({
-  declarations: [AppComponent],
-  imports: [BrowserModule, ViserModule],
+  declarations: [
+    AppComponent
+  ],
+  imports: [
+    BrowserModule,
+    ViserModule
+  ],
   providers: [],
-  bootstrap: [AppComponent],
+  bootstrap: [
+    AppComponent
+  ]
 })
-export default class AppModule {}
+export default class AppModule { }
+

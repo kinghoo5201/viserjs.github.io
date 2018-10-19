@@ -1,130 +1,71 @@
 import * as React from 'react';
-import { Axis, Area, Chart, Line, Tooltip } from 'viser-react';
-const DataSet = require('@antv/data-set');
+import { Chart, Tooltip, Axis, Line } from 'viser-react';
 
-const data = [
-  {
-    year: '1986',
-    ACME: 162,
-    Compitor: 42,
-  },
-  {
-    year: '1987',
-    ACME: 134,
-    Compitor: 54,
-  },
-  {
-    year: '1988',
-    ACME: 116,
-    Compitor: 26,
-  },
-  {
-    year: '1989',
-    ACME: 122,
-    Compitor: 32,
-  },
-  {
-    year: '1990',
-    ACME: 178,
-    Compitor: 68,
-  },
-  {
-    year: '1991',
-    ACME: 144,
-    Compitor: 54,
-  },
-  {
-    year: '1992',
-    ACME: 125,
-    Compitor: 35,
-  },
-  {
-    year: '1993',
-    ACME: 176,
-    Compitor: 66,
-  },
-  {
-    year: '1994',
-    ACME: 156,
-  },
-  {
-    year: '1995',
-    ACME: 195,
-  },
-  {
-    year: '1996',
-    ACME: 215,
-  },
-  {
-    year: '1997',
-    ACME: 176,
-    Compitor: 36,
-  },
-  {
-    year: '1998',
-    ACME: 167,
-    Compitor: 47,
-  },
-  {
-    year: '1999',
-    ACME: 142,
-  },
-  {
-    year: '2000',
-    ACME: 117,
-  },
-  {
-    year: '2001',
-    ACME: 113,
-    Compitor: 23,
-  },
-  {
-    year: '2002',
-    ACME: 132,
-  },
-  {
-    year: '2003',
-    ACME: 146,
-    Compitor: 46,
-  },
-  {
-    year: '2004',
-    ACME: 169,
-    Compitor: 59,
-  },
-  {
-    year: '2005',
-    ACME: 184,
-    Compitor: 44,
-  },
-];
 const scale = [
   {
-    dataKey: 'value',
-    alias: 'The Share Price in Dollars',
-    formatter: val => '$' + val,
+    dataKey: 'time',
+    alias: '时间',
+    type: 'time',
+    mask: 'MM:ss',
+    tickCount: 20,
+    nice: false 
   },
   {
-    dataKey: 'year',
-    range: [0, 1],
-  },
-];
-const dv = new DataSet.View().source(data);
-dv.transform({
-  type: 'fold',
-  fields: ['ACME', 'Compitor'],
-  key: 'type',
-  value: 'value',
-});
+    dataKey: 'temperature',
+    alias: '平均温度(°C)',
+    min: 10,
+    max: 35 
+  },{
+    dataKey: 'type',
+    type: 'cat',
+  }
+  ];
 
 export default class App extends React.Component {
+  state = {
+    data: []
+  }
+  updateData=() =>{
+    const me = this;
+    const now = new Date();
+    const time = now.getTime();
+    const temperature1 = ~~(Math.random() * 5) + 22;
+    const temperature2 = ~~(Math.random() * 7) + 17;
+    let newData = me.state.data.slice();
+    if (newData.length >= 200) {
+      newData.shift();
+      newData.shift();
+    }
+    newData.push({
+      time: time,
+      temperature: temperature1,
+      type: '记录1'
+    });
+    newData.push({
+      time: time,
+      temperature: temperature2,
+      type: '记录2'
+    });
+    me.setState({
+      data: newData
+    })
+  }
+  componentDidMount(){
+    setInterval(this.updateData,1000);
+  }
+  
   render() {
+    const getData = this.state.data;
     return (
-      <Chart forceFit={true} height={400} data={dv} scale={scale}>
-        <Axis />
-        <Tooltip crosshairs={true} />
-        <Area position="year*value" color="type" shape="smooth" />
-        <Line position="year*value" color="type" size={2} shape="smooth" />
+      <Chart
+        forceFit={true}
+        height={400}
+        data={getData}
+        scale={scale}
+      > 
+        <Tooltip/>
+        <Axis/>
+        <Line position="time*temperature" color={['type',['#ff7f0e', '#2ca02c']]}  shape="smooth"/>
       </Chart>
     );
   }

@@ -75,7 +75,7 @@ const examples = {
         {
           path: 'example1',
           enName: 'Basic column',
-          cnName: '简单柱状图',
+          cnName: '基础柱状图',
         },
         {
           path: 'example2',
@@ -221,7 +221,7 @@ const examples = {
         {
           path: 'example2',
           enName: 'Basic Area (with negative value)',
-          cnName: '基础面积图',
+          cnName: '基础面积图（有负值）',
         },
         {
           path: 'example3',
@@ -252,23 +252,23 @@ const examples = {
         },
         {
           path: 'example2',
-          enName: 'Basic Box (with abnormal value)',
-          cnName: '基础箱型图（有异常值）',
-        },
-        {
-          path: 'example3',
-          enName: 'Group Box',
-          cnName: '分组箱型图',
-        },
-        {
-          path: 'example4',
           enName: 'Simple Dimesion Box',
           cnName: '一维箱型图',
         },
         {
-          path: 'example5',
+          path: 'example3',
           enName: 'Box with Polar Coordinates',
           cnName: '极坐标系下箱型图',
+        },
+        {
+          path: 'example4',
+          enName: 'Basic Box (with abnormal value)',
+          cnName: '基础箱型图（有异常值）',
+        },
+        {
+          path: 'example5',
+          enName: 'Group Box',
+          cnName: '分组箱型图',
         },
       ],
       icon: 'xiangxiantu',
@@ -565,339 +565,339 @@ const examples = {
       examples: [
         {
           path: 'example1',
-          enName: 'Timeline Bubble',
-          cnName: '时间序列气泡图',
+          enName: 'area-horizon-graph',
+          cnName: '地平面图',
         },
         {
           path: 'example2',
-          enName: 'Custom Shape Bubble',
-          cnName: '气泡图-自定义 shape',
-        },
-        {
-          path: 'example3',
-          enName: 'Text Bubble',
-          cnName: '带文本的气泡图',
-        },
-        {
-          path: 'example4',
           enName: 'Punch Card',
           cnName: 'Punch Card',
         },
         {
+          path: 'example3',
+          enName: 'area-null',
+          cnName: '区域图（存在空值）',
+        }
+        {
           path: 'example5',
-          enName: 'Word Cloud',
-          cnName: '词云',
+          enName: 'area-range-line',
+          cnName: '范围区域图与线图',
         },
         {
           path: 'example6',
+          enName: 'bar-diverge',
+          cnName: '柱状图-diverging',
+        },
+        {
+          path: 'example7',
+          enName: 'brush-ds-state',
+          cnName: 'viser-brush 结合 DataSet',
+        },
+        {
+          path: 'example8',
+          enName: 'brush-filter-shape',
+          cnName: 'viser-brush 过滤图形',
+        },
+        // {
+        //   path: 'example9',
+        //   enName: 'brush-highlight',
+        //   cnName: 'viser-brush 高亮图形',
+        // },
+        {
+          path: 'example10',
+          enName: 'brush-bar',
+          cnName: 'g2-brush 柱状图',
+        },
+        {
+          path: 'example11',
+          enName: 'brush-line',
+          cnName: 'g2-brush 折线图',
+        },
+        {
+          path: 'example12',
+          enName: 'brush-polygon',
+          cnName: 'g2-brush 多边形',
+        },
+        {
+          path: 'example13',
+          enName: 'Custom Shape Bubble',
+          cnName: '气泡图-自定义 shape',
+        },
+        {
+          path: 'example14',
+          enName: 'Text Bubble',
+          cnName: '带文本的气泡图',
+        },
+        {
+          path: 'example15',
+          enName: 'Timeline Bubble',
+          cnName: '时间序列气泡图',
+        },
+        {
+          path: 'example16',
           enName: 'Word Cloud Mask',
           cnName: '带图片遮罩的词云',
         },
         {
-          path: 'example7',
-          enName: 'Pizza Chart',
-          cnName: 'Pizza Chart',
-        },
-        {
-          path: 'example8',
-          enName: 'Custom Label Pie',
-          cnName: '个性化标签饼图',
-        },
-        {
-          path: 'example9',
+          path: 'example18',
           enName: 'Daily Life Visualization',
           cnName: '日常作息可视化',
         },
         {
-          path: 'example10',
-          enName: 'Slice Pie',
-          cnName: '分片饼图',
-        },
-        {
-          path: 'example11',
-          enName: 'Double Ring',
-          cnName: '双环图',
-        },
-        {
-          path: 'example12',
-          enName: 'Stack Bar in Polar Axis',
-          cnName: '极坐标下的层叠柱状图',
-        },
-        {
-          path: 'example13',
-          enName: 'Nightingale Rose',
-          cnName: '南丁格尔玫瑰图',
-        },
-        {
-          path: 'example14',
-          enName: 'Jade Jue',
-          cnName: '玉珏图',
-        },
-        {
-          path: 'example15',
-          enName: 'Radial Bar Chart',
-          cnName: 'Radial Bar Chart',
-        },
-        {
-          path: 'example16',
-          enName: 'Polar Heatmap',
-          cnName: 'Polar Heatma',
-        },
-        {
-          path: 'example17',
-          enName: 'Spiral coordinate',
-          cnName: '螺旋坐标系',
-        },
-        {
-          path: 'example18',
-          enName: 'Polar range column',
-          cnName: '一年的日均温度可视化',
-        },
-        {
-          path: 'example19',
-          enName: 'Wind rose',
-          cnName: '风向玫瑰图',
-        },
-        {
-          path: 'example20',
-          enName: 'Cutomize Tooltip',
-          cnName: '个性化Tooltip',
-        },
-        {
           path: 'example21',
-          enName: 'Double Axes',
-          cnName: '双轴图表',
-        },
-        {
-          path: 'example22',
-          enName: 'Kagi Chart',
-          cnName: 'Kagi Chart',
-        },
-        {
-          path: 'example23',
-          enName: 'path chart',
-          cnName: '路径图',
-        },
-        {
-          path: 'example24',
-          enName: 'bullet',
-          cnName: '子弹图',
-        },
-        {
-          path: 'example25',
           enName: 'Grouping stacked histograms',
           cnName: '分组层叠柱状图',
         },
         {
           path: 'example26',
+          enName: 'bar with round corner',
+          cnName: '圆角柱状图',
+        },
+        {
+          path: 'example27',
+          enName: 'Cutomize Tooltip',
+          cnName: '个性化Tooltip',
+        },
+        {
+          path: 'example28',
+          enName: 'Double Ring',
+          cnName: '双环图',
+        },
+        {
+          path: 'example29',
+          enName: 'Double Axes',
+          cnName: '双轴图表',
+        },
+        {
+          path: 'example36',
+          enName: 'veen-hollow',
+          cnName: '空心维恩图',
+        },
+        {
+          path: 'example37',
+          enName: 'line chart with dash',
+          cnName: '带虚线部分的折线图',
+        },
+        {
+          path: 'example38',
+          enName: 'Rainfall traffic contrast',
+          cnName: '雨量流量对比',
+        },
+        {
+          path: 'example39',
+          enName: 'line chart update constantly',
+          cnName: '实时更新数据的折线图',
+        },
+        {
+          path: 'example42',
+          enName: 'map-symbol',
+          cnName: '符号地图',
+        },
+        {
+          path: 'example43',
+          enName: 'area-large',
+          cnName: '大规模区域图',
+        },
+        {
+          path: 'example44',
+          enName: 'peking-aqi',
+          cnName: '北京市2010至2015年空气质量指数',
+        },
+        {
+          path: 'example46',
+          enName: 'pie-column',
+          cnName: '饼图-柱状图',
+        },
+        {
+          path: 'example47',
+          enName: 'Custom Label Pie',
+          cnName: '个性化标签饼图',
+        },
+        {
+          path: 'example48',
+          enName: 'pie-multi-donuts',
+          cnName: '多环图',
+        },
+        {
+          path: 'example49',
+          enName: 'pie-platelets',
+          cnName: '饼图-花瓣图',
+        },
+        {
+          path: 'example50',
+          enName: 'pie-ranged',
+          cnName: '饼图-限定角度范围',
+        },
+        {
+          path: 'example51',
+          enName: 'pie-size',
+          cnName: '饼图-半径大小',
+        },
+        {
+          path: 'example52',
+          enName: 'pie-slice',
+          cnName: '饼图-分割空白',
+        },
+        {
+          path: 'example53',
+          enName: 'pie-texture',
+          cnName: '饼图-带纹理',
+        },
+        {
+          path: 'example54',
+          enName: 'pie-triangle',
+          cnName: '饼图-三角',
+        },
+        {
+          path: 'example55',
           enName: 'Visualization of unit test coverage',
           cnName: '单元测试覆盖率可视化',
         },
         {
-          path: 'example27',
+          path: 'example56',
+          enName: 'sparklines',
+          cnName: '迷你图',
+        },
+        {
+          path: 'example57',
+          enName: 'sankey-layouts',
+          cnName: '桑基图布局',
+        },
+        {
+          path: 'example58',
+          enName: 'rose-ranged',
+          cnName: '玫瑰图-限定角度范围',
+        },
+        {
+          path: 'example59',
+          enName: 'rectbin-size',
+          cnName: '矩形大小分箱图',
+        },
+        {
+          path: 'example60',
+          enName: 'Word Cloud',
+          cnName: '词云',
+        },
+        {
+          path: 'example61',
+          enName: 'Pizza Chart',
+          cnName: 'Pizza Chart',
+        },
+        {
+          path: 'example62',
+          enName: 'Slice Pie',
+          cnName: '分片饼图',
+        },
+        {
+          path: 'example63',
+          enName: 'Stack Bar in Polar Axis',
+          cnName: '极坐标下的层叠柱状图',
+        },
+        {
+          path: 'example64',
+          enName: 'Nightingale Rose',
+          cnName: '南丁格尔玫瑰图',
+        },
+        {
+          path: 'example65',
+          enName: 'Jade Jue',
+          cnName: '玉珏图',
+        },
+        {
+          path: 'example66',
+          enName: 'Radial Bar Chart',
+          cnName: 'Radial Bar Chart',
+        },
+        {
+          path: 'example67',
+          enName: 'Polar Heatmap',
+          cnName: 'Polar Heatma',
+        },
+        {
+          path: 'example68',
+          enName: 'Spiral coordinate',
+          cnName: '螺旋坐标系',
+        },
+        {
+          path: 'example69',
+          enName: 'Polar range column',
+          cnName: '一年的日均温度可视化',
+        },
+        {
+          path: 'example70',
+          enName: 'Wind rose',
+          cnName: '风向玫瑰图',
+        },
+        {
+          path: 'example71',
+          enName: 'Kagi Chart',
+          cnName: 'Kagi Chart',
+        },
+        {
+          path: 'example72',
+          enName: 'path chart',
+          cnName: '路径图',
+        },
+        {
+          path: 'example73',
+          enName: 'bullet',
+          cnName: '子弹图',
+        },
+        {
+          path: 'example74',
           enName: 'Kernel Function Probability Density Regression curvr',
           cnName: '核函数概率密度回归曲线',
         },
         {
-          path: 'example28',
+          path: 'example75',
           enName:
             'Kernel Function Probability Density Regression curvr with Tow fields',
           cnName: '核函数概率密度回归曲线（两字段）',
         },
         {
-          path: 'example29',
+          path: 'example76',
           enName: 'Regression curve',
           cnName: '回归曲线',
         },
         {
-          path: 'example30',
+          path: 'example77',
           enName: 'Kernel Function Probability Density Distribution',
           cnName: '核函数概率密度分布',
         },
         {
-          path: 'example31',
+          path: 'example78',
           enName: 'streamgraph',
           cnName: 'streamgraph',
         },
         {
-          path: 'example32',
-          enName: 'Rainfall traffic contrast',
-          cnName: '雨量流量对比',
-        },
-        {
-          path: 'example33',
-          enName: 'bar with round corner',
-          cnName: '圆角柱状图',
-        },
-        {
-          path: 'example34',
+          path: 'example79',
           enName: 'stack bar with round corner',
           cnName: '圆角堆叠柱状图',
         },
         {
-          path: 'example35',
+          path: 'example80',
           enName: 'Periodic table of ele ments',
           cnName: '元素周期表',
         },
         {
-          path: 'example36',
+          path: 'example81',
           enName: 'Waffle',
           cnName: '华夫图',
         },
         {
-          path: 'example37',
-          enName: 'liquid-fill-gauge',
-          cnName: '水波图',
-        },
-        {
-          path: 'example38',
-          enName: 'area-horizon-graph',
-          cnName: '地平面图',
-        },
-        {
-          path: 'example39',
-          enName: 'area-null',
-          cnName: '区域图（存在空值）',
-        },
-        {
-          path: 'example40',
-          enName: 'pie-ranged',
-          cnName: '饼图-限定角度范围',
-        },
-        {
-          path: 'example41',
-          enName: 'bar-diverge',
-          cnName: '柱状图-diverging',
-        },
-        {
-          path: 'example42',
-          enName: 'pie-platelets',
-          cnName: '饼图-花瓣图',
-        },
-        {
-          path: 'example43',
-          enName: 'pie-size',
-          cnName: '饼图-半径大小',
-        },
-        {
-          path: 'example44',
-          enName: 'pie-slice',
-          cnName: '饼图-分割空白',
-        },
-        {
-          path: 'example45',
-          enName: 'pie-texture',
-          cnName: '饼图-带纹理',
-        },
-        {
-          path: 'example46',
-          enName: 'pie-triangle',
-          cnName: '饼图-三角',
-        },
-        {
-          path: 'example47',
-          enName: 'rose-ranged',
-          cnName: '玫瑰图-限定角度范围',
-        },
-        {
-          path: 'example48',
-          enName: 'rectbin-size',
-          cnName: '矩形大小分箱图',
-        },
-        {
-          path: 'example49',
-          enName: 'peking-aqi',
-          cnName: '北京市2010至2015年空气质量指数',
-        },
-        {
-          path: 'example50',
-          enName: 'pie-multi-donuts',
-          cnName: '多环图',
-        },
-        {
-          path: 'example51',
-          enName: 'map-symbol',
-          cnName: '符号地图',
-        },
-        {
-          path: 'example52',
-          enName: 'area-large',
-          cnName: '大规模区域图',
-        },
-        {
-          path: 'example53',
-          enName: 'area-range-line',
-          cnName: '范围区域图与线图',
-        },
-        {
-          path: 'example54',
-          enName: 'liquid-fill-path',
-          cnName: '水波图—自定义路径',
-        },
-        {
-          path: 'example55',
-          enName: 'line chart with dash',
-          cnName: '带虚线部分的折线图',
-        },
-        {
-          path: 'example56',
-          enName: 'line chart update constantly',
-          cnName: '实时更新数据的折线图',
-        },
-        {
-          path: 'example57',
-          enName: 'sparklines',
-          cnName: '迷你图',
-        },
-        {
-          path: 'example58',
-          enName: 'sankey-layouts',
-          cnName: '桑基图布局',
-        },
-        {
-          path: 'example70',
+          path: 'example83',
           enName: 'veen',
           cnName: '维恩图',
         },
         {
-          path: 'example59',
-          enName: 'veen-hollow',
-          cnName: '空心维恩图',
+          path: 'example84',
+          enName: 'liquid-fill-gauge',
+          cnName: '水波图',
         },
         {
-          path: 'example60',
-          enName: 'brush-ds-state',
-          cnName: 'viser-brush 结合 DataSet',
-        },
-        {
-          path: 'example61',
-          enName: 'brush-filter-shape',
-          cnName: 'viser-brush 过滤图形',
-        },
-        // {
-        //   path: 'example62',
-        //   enName: 'brush-highlight',
-        //   cnName: 'viser-brush 高亮图形',
-        // },
-        {
-          path: 'example63',
-          enName: 'pie-column',
-          cnName: '饼图-柱状图',
-        },
-        {
-          path: 'example71',
-          enName: 'brush-bar',
-          cnName: 'g2-brush 柱状图',
-        },
-        {
-          path: 'example72',
-          enName: 'brush-line',
-          cnName: 'g2-brush 折线图',
-        },
-        {
-          path: 'example73',
-          enName: 'brush-polygon',
-          cnName: 'g2-brush 多边形',
+          path: 'example85',
+          enName: 'liquid-fill-path',
+          cnName: '水波图—自定义路径',
         },
       ],
       icon: 'others',

@@ -3,142 +3,149 @@ import 'reflect-metadata';
 import { Component, enableProdMode, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { ViserModule } from 'viser-ng';
-import * as $ from 'jquery';
 const DataSet = require('@antv/data-set');
 
-const scale = [{
-  dataKey: 'date',
-  type: 'cat',
-}, {
-  dataKey: 'range',
-  max: 30,
-  min: -25,
-}, {
-  dataKey: 'mean_temp',
-  alias: 'Average Daily Temperature',
-}];
+const text = [ 'MIDNIGHT', '3 AM', '6 AM', '9 AM', 'NOON', '3 PM', '6 PM', '9 PM' ];
 
-const legendOpt = {
-  offset: 25,
-  title: {
-    fontSize: 12,
-    fill: '#4F4F4F',
-    fontWeight: 300,
-    textAlign: 'start'
+const data = [];
+for (let i = 0; i < 24; i++) {
+  const item = {} as any;
+  item.type = i + '';
+  item.value = 10;
+  data.push(item);
+}
+
+const dv = new DataSet.View().source(data).transform({
+  type: 'percent',
+  field: 'value',
+  dimension: 'type',
+  as: 'percent'
+});
+
+const stackInterval1Opts = {
+  position: 'percent',
+  color: ['type', ['rgba(255, 255, 255, 0)']],
+  style: {
+    stroke: '#444',
+    lineWidth: 1
   },
-  slidable: false,
-  position: 'bottom',
-  offsetX: 25,
+  tooltip: false,
+  select: false,
 };
 
-const guideLineOpt = {
-  start: {
-    date: 'min',
-    range: 'min'
+const guideOpts = {
+  type: 'text',
+  position: [ '50%', '50%' ],
+  content: '24 hours',
+  style: {
+    lineHeight: '240px',
+    fontSize: '30',
+    fill: '#262626',
+    textAlign: 'center',
   },
-  end: {
-    date: 'min',
-    range: 'max'
-  },
-  lineStyle: {
-    stroke: '#aaa',
-    lineWidth: 1,
-    lineDash: null
-  },
-  text: {
-    position: 1,
-    offsetY: -6,
-    autoRotate: false,
-    style: {
-      fontSize: 16,
-      textAlign: 'center',
-      fontWeight: 100,
-      fill: '#aaa'
-    },
-    content: 'January'
+};
+
+const stackInterval2Opts = {
+  position: 'type*value',
+  size: ['type', function(val) {
+    if (val % 3 === 0) {
+      return 4;
+    } else {
+      return 0;
+    }
+  }],
+  color: '#444',
+  tooltip: false,
+  label: ['type', function(val: any) {
+    if (val % 3 === 0) {
+      return text[val / 3];
+    }
+    return '';
+  }, {
+    offset: 15,
+    textStyle: {
+      fontSize: 12,
+      fontWeight: 'bold',
+      fill: '#bfbfbf'
+    }
+  }]
+};
+
+const userData = [
+  { type: '睡眠', value: 70 },
+  { type: '淡茶 & 烟斗 & 冥想', value: 10 },
+  { type: '写作', value: 10 },
+  { type: '教课', value: 40 },
+  { type: '酒吧吃肉配白酒', value: 40 },
+  { type: '散步', value: 10 },
+  { type: '拜访马大大', value: 30 },
+  { type: '阅读', value: 30 },
+];
+
+const userDv = new DataSet.View().source(userData).transform({
+  type: 'percent',
+  field: 'value',
+  dimension: 'type',
+  as: 'percent'
+});
+
+const userScale = [{
+  dataKey: 'percent',
+  formatter: (val: any) => {
+    return (val * 100).toFixed(2) + '%';
   }
+}];
+
+const stackInterval3Opts = {
+  position: 'percent',
+  color: 'type',
+  label: ['type', {
+    offset: 40,
+  }],
+  select: false,
 };
 
 @Component({
   selector: '#mount',
   template: `
   <div>
-    <v-chart [forceFit]="forceFit" [height]="height" [padding]="padding" [data]="data">
-      <v-legend
-        [offset]="legendOpt.offset"
-        [title]="legendOpt.title"
-        [slidable]="legendOpt.slidable"
-        [position]="legendOpt.position"
-        [offsetX]="legendOpt.offsetX"
-      ></v-legend>
-      <v-tooltip></v-tooltip>
-      <v-coord type="polar" [innerRadius]="0.35"></v-coord>
-      <v-axis dataKey="date" [show]="false"></v-axis>
-      <v-axis dataKey="range" [line]="null" [tickLine]="null" [label]="null"></v-axis>
-      <v-interval position="date*range" [color]="color" [size]="2.5" [opacity]="1"></v-interval>
-      <v-guide
-        type="line"
-        [start]="guideLineOpt.start"
-        [end]="guideLineOpt.end"
-        [lineStyle]="guideLineOpt.lineStyle"
-        [text]="guideLineOpt.text"
-        content="January"
-      ></v-guide>
-      <v-guide
-        *ngFor="let entry of guideTextData"
-        type="text"
-        [start]="this.getStart(entry)"
-        [content]="this.getContent(entry)"
-        [style]="{
-          fill: '#C4C4C4',
-          fontSize: 12,
-          fontWeight: 100,
-          textAlign: 'center',
-          textBaseline: 'middle'
-        }"
-      ></v-guide>
+    <v-chart [forceFit]="forceFit" [height]="height" [padding]="80">
+      <v-tooltip [showTitle]="false"></v-tooltip>
+      <v-view [data]="dv">
+        <v-coord type="theta" [innerRadius]="0.9"></v-coord>
+        <v-stack-interval [position]="stackInterval1Opts.position" [color]="stackInterval1Opts.color"
+          [style]="stackInterval1Opts.style" [tooltip]="stackInterval1Opts.tooltip"
+          [select]="stackInterval1Opts.select"></v-stack-interval>
+        <v-guide [type]="guideOpts.type" [position]="guideOpts.position"
+          [content]="guideOpts.content" [style]="guideOpts.style"></v-guide>
+      </v-view>
+      <v-view [data]="dv">
+        <v-coord type="polar" [innerRadius]="0.9"></v-coord>
+        <v-stack-interval [position]="stackInterval2Opts.position" [size]="stackInterval2Opts.size"
+          [color]="stackInterval2Opts.color" [tooltip]="stackInterval2Opts.tooltip"
+          [label]="stackInterval2Opts.label"></v-stack-interval>
+      </v-view>
+      <v-view [data]="userDv" [scale]="userScale">
+        <v-coord type="theta" [innerRadius]="0.75"></v-coord>
+        <v-stack-interval [position]="stackInterval3Opts.position" [color]="stackInterval3Opts.color"
+          [label]="stackInterval3Opts.label"
+          [select]="stackInterval3Opts.select"></v-stack-interval>
+      </v-view>
     </v-chart>
   </div>
   `
 })
+
 class AppComponent {
   forceFit: boolean = true;
   height: number = 400;
-  padding = [20, 0, 105];
-  data = [];
-  scale = scale;
-  color = ['mean_temp', 'rgb(44, 123, 182)-rgb(0, 166, 202)-rgb(0, 204, 188)-rgb(144, 235, 157)-rgb(255, 255, 140)-rgb(249, 208, 87)-rgb(242, 158, 46)-rgb(231, 104, 24)-rgb(215, 25, 28)'];
-  legendOpt = legendOpt;
-  guideLineOpt = guideLineOpt;
-  guideTextData = [ -20, -10, 0, 10, 20, 30 ];
-
-  getStart(entry) {
-    return {
-      date: '2015-7-1',
-      range: entry,
-    };
-  }
-
-  getContent(entry) {
-    return `${entry}°C`;
-  }
-
-  constructor() {
-    $.getJSON('/assets/data/daily-temp-in-boston.json', (data) => {
-      const ds = new DataSet();
-      const dv = ds.createView()
-      .source(data)
-      .transform({
-        type: 'map',
-        callback(row) {
-          row.range = [row.min_temp, row.max_temp];
-          return row;
-        }
-      });
-
-      this.data = dv;
-    });
-  }
+  dv = dv;
+  stackInterval1Opts = stackInterval1Opts;
+  guideOpts = guideOpts;
+  stackInterval2Opts = stackInterval2Opts;
+  userDv = userDv;
+  userScale = userScale;
+  stackInterval3Opts = stackInterval3Opts;
 }
 
 @NgModule({

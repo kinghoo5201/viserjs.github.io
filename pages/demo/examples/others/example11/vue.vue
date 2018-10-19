@@ -1,99 +1,103 @@
 <template>
-  <div>
-    <v-chart :force-fit="forceFit" :height="height" :data="data" :padding="padding">
-      <v-tooltip :show-title="tooltipShowFalse" />
-      <v-legend data-key="area" :offset="legendOffset" />
-      <v-facet
-        type="rect"
-        :fields="facetFields"
-        :padding="facetPadding"
-        :row-title="facetRowTitle"
-        :col-title="facetColTitle"
-        :views="facetViews"
-      ></v-facet>
+  <div v-if="data.length">
+    <v-chart
+      :forceFit="true"
+      height="400"
+      :data="dv"
+      :scale="scale"
+      :padding="padding"
+    >
+      <v-legend position="top"></v-legend>
+      <v-tooltip></v-tooltip>
+      <v-line 
+        position="date*value"
+        color="city"
+        shape="spline"
+      >
+      </v-line>
+      <v-axis
+        dataKey="date"
+        :line="axisxLine"
+        :tickLine="axisxLine"
+        :label="axisxLabel"
+      >
+      </v-axis>
+      <v-axis
+        dataKey="value"
+        :line="axisxLine"
+        :tickLine="axisxLine"
+        :label="axisyLabel"
+      >
+      </v-axis>
+      <v-brush
+        type=""  
+        :style="brushStyle"
+      >
+      </v-brush>
     </v-chart>
   </div>
 </template>
 
 <script>
-const DataSet = require('@antv/data-set');
-const { DataView } = DataSet;
-
-const data = [
-  {year:2007, area:'亚太地区', profit: 7860*0.189},
-  {year:2007, area:'非洲及中东', profit: 7860*0.042},
-  {year:2007, area:'拉丁美洲', profit: 7860*0.025},
-  {year:2007, area:'中欧和东欧', profit: 7860*0.018},
-  {year:2007, area:'西欧', profit: 7860*0.462},
-  {year:2007, area:'北美', profit: 7860*0.265},
-  {year:2011, area:'亚太地区', profit: 7620*0.539},
-  {year:2011, area:'非洲及中东', profit: 7620*0.065},
-  {year:2011, area:'拉丁美洲', profit: 7620*0.065},
-  {year:2011, area:'中欧和东欧', profit: 7620*0.034},
-  {year:2011, area:'西欧', profit: 7620*0.063},
-  {year:2011, area:'北美', profit: 7620*0.234}
-];
-
-const views = (view, facet) => {
-  const data = facet.data;
-  const dv = new DataView();
-  dv.source(data)
-    .transform({
-      type: 'percent',
-      field: 'profit',
-      dimension: 'area',
-      as: 'percent'
-    });
-
-  return {
-    data: dv,
-    scale: {
-      dataKey: 'percent',
-      formatter: '.2%',
-    },
-    coord: {
-      type: 'theta',
-      innerRadius: 0.35,
-    },
-    series: {
-      quickType: 'stackBar',
-      position: 'percent',
-      color: 'area',
-      label: ['percent', {
-        offset: -8,
-      }],
-      style: {
-        lineWidth: 1,
-        stroke: '#fff',
-      }
-    }
-  }
-};
-
 export default {
+  mounted(){
+    $.getJSON('/assets/data/avg-temp.json',data=>{
+      const ds = new DataSet();
+      const scale=[
+        {
+          dataKey: 'date',
+          type: 'time'
+        },
+        {
+          dataKey: 'value',
+          alias: 'Temperature, ºF'
+        }
+      ];
+      this.$data.data=data;
+      this.$data.ds=ds;
+      this.$data.scale=scale;
+      this.getDv();
+    });
+  },
+  methods:{
+    getDv(){
+      const {ds,data}=this;
+      const dv = ds.createView();
+      dv.source(data).transform({
+        type: 'fold',
+        key: 'city',
+        value: 'value',
+        fields: ['New York', 'San Francisco', 'Austin']
+      });
+      this.dv=dv;
+    },
+  },
   data() {
     return {
-      forceFit: true,
-      data,
-      height: 400,
-      padding: 80,
-
-      tooltipShowFalse: false,
-      legendOffset: 20,
-
-      facetViews: views,
-      facetFields: ['year'],
-      facetPadding: 20,
-      facetRowTitle: null,
-      facetColTitle: {
-        offsetY: -30,
-        style: {
-          fontSize: 18,
-          textAlign: 'center',
-          fill: '#999'
+      data:[],
+      ds:{},
+      scale:[],
+      dv:{}, 
+      padding:[60, 30, 30],
+      axisxLine:{
+        stroke: '#000'
+      },
+      axisxLabel:{
+        textStyle: {
+          textAlign: 'start'
         }
       },
+      axisyLabel:{
+        textStyle: {
+          fill: '#000'
+        }
+      },
+      brushStyle:{
+        fill: '#ccc',
+        fillOpacity: 0.4
+      }
     };
   }
 };
 </script>
+

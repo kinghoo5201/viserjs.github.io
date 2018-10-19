@@ -1,91 +1,132 @@
 <template>
   <div>
-    <v-chart :forceFit="true" :height="height" :data="source" :scale="scale" :padding="padding">
+    <v-chart :force-fit="true" :height="height" :padding="[100, 150]" :data="data" :scale="scale">
       <v-tooltip />
-      <v-axis
-        dataKey="name"
-        :grid="gridy"
-        :tickLine="null"
-      >
-      </v-axis>
-      <v-axis
-        dataKey="day"
-        :grid="gridx"
-      >
-      </v-axis>
-      <v-polygon 
-        position="name*day" 
-        :color="color"
-        :style="style"
-      />
-      <v-brush
-        type=""  
-        :style="brushStyle"
-      >
-      </v-brush>
+      <v-legend :custom="true" :clickable="false" :items="legendItems"/>
+      <v-view v-for="(item, i) in data" :key="i" :start="getStart(i)" :end="getEnd(i)" :data="[item]" :scale="getScale(item, i)">
+        <v-coord type="rect" direction='LB'/>
+        <v-axis dataKey="target" :show="false"/>
+        <v-axis dataKey="actual" position="right"/>
+        <v-point position="title*target" color="#square" shape="line" :size="12" :v-style="{lineWidth: 2}"/>
+        <v-interval position="title*actual" color="#223273" :size="15"/>
+        <v-guide type="region" :start="getGuide(item, 0, 'start')" :end="getGuide(item, 0, 'end')"
+          :v-style="{
+            fill: '#FFA39E',
+            fillOpacity: 0.85
+          }"/>
+        <v-guide type="region" :start="getGuide(item, 1, 'start')" :end="getGuide(item, 1, 'end')"
+          :v-style="{
+            fill: '#FFD591',
+            fillOpacity: 0.85
+          }"/>
+        <v-guide type="region" :start="getGuide(item, 2, 'start')" :end="getGuide(item, 2, 'end')"
+          :v-style="{
+            fill: '#A7E8B4',
+            fillOpacity: 0.85
+          }"/>
+      </v-view>
     </v-chart>
   </div>
 </template>
 
 <script>
-  const data = [[0, 0, 10], [0, 1, 19], [0, 2, 8], [0, 3, 24], [0, 4, 67], [1, 0, 92], [1, 1, 58], [1, 2, 78], [1, 3, 117], [1, 4, 48], [2, 0, 35], [2, 1, 15], [2, 2, 123], [2, 3, 64], [2, 4, 52], [3, 0, 72], [3, 1, 132], [3, 2, 114], [3, 3, 19], [3, 4, 16], [4, 0, 38], [4, 1, 5], [4, 2, 8], [4, 3, 117], [4, 4, 115], [5, 0, 88], [5, 1, 32], [5, 2, 12], [5, 3, 6], [5, 4, 120], [6, 0, 13], [6, 1, 44], [6, 2, 88], [6, 3, 98], [6, 4, 96], [7, 0, 31], [7, 1, 1], [7, 2, 82], [7, 3, 32], [7, 4, 30], [8, 0, 85], [8, 1, 97], [8, 2, 123], [8, 3, 64], [8, 4, 84], [9, 0, 47], [9, 1, 114], [9, 2, 31], [9, 3, 48], [9, 4, 91]];
-  let source = [];
-  for (let i = 0; i < data.length; i++) {
-    let item = data[i];
-    let obj = {};
-    obj.name = item[0];
-    obj.day = item[1];
-    obj.sales = item[2];
-    source.push(obj);
-  }
-  const scale = [
-    {
-      dataKey: 'name',
-      type: 'cat',
-      values: ['Alexander', 'Marie', 'Maximilian', 'Sophia', 'Lukas', 'Maria', 'Leon', 'Anna', 'Tim', 'Laura']
-    },
-    {
-      dataKey: 'day',
-      type: 'cat',
-      values: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
-    }
-  ];
+const data = [
+  {"title":"Revenue","subtitle":"US$, in thousands","ranges":[150,225,300],"actual":270,"target":250},
+  {"title":"Profit","subtitle":"%","ranges":[20,25,30],"actual":23,"target":26},
+  {"title":"Order Size","subtitle":"US$, average","ranges":[350,500,600],"actual":100,"target":550},
+  {"title":"New Customers","subtitle":"count","ranges":[1400,2000,2500],"actual":1650,"target":2100},
+  {"title":"Satisfaction","subtitle":"out of 5","ranges":[3.5,4.25,5],"actual":3.2,"target":4.4}
+];
 
-  export default {
-    data() {
-      return {
-        source,
-        scale,
-        height: 400,
-        padding: 80,
-        gridy: {
-          align: 'center',
-          lineStyle: {
-            lineWidth: 1,
-            lineDash: null,
-            stroke: '#f0f0f0'
-          }
-        },
-        gridx: {
-          align: 'center',
-          lineStyle: {
-            lineWidth: 1,
-            lineDash: null,
-            stroke: '#f0f0f0'
-          }
-        },
-        color: ['sales', '#BAE7FF-#1890FF-#0050B3'],
-        style: {
-          lineWidth: 1,
-          stroke: '#fff'
-        },
-        brushStyle: {
-          lineWidth: 1,
-          stroke: '#999',
-          fill: '#999',
-          fillOpacity: 0.3
-        }
-      };
+const scale = [{
+  dataKey: 'population',
+  tickInterval: 1000000,
+}];
+
+const colorMap = {
+  'Under 5 Years': '#E3F4BF',
+  '5 to 13 Years': '#BEF7C8',
+  '14 to 17 Years': '#86E6C8',
+  '18 to 24 Years': '#36CFC9',
+  '25 to 44 Years': '#209BDD',
+  '45 to 64 Years': '#1581E6',
+  '65 Years and Over': '#0860BF'
+};
+
+const legendItems = [
+  {
+    value: '差',
+    marker: {symbol: 'square', fill: '#FFA39E', radius: 5}
+  },
+  {
+    value: '良',
+    marker: {symbol: 'square', fill: '#FFD591', radius: 5}
+  },
+  {
+    value: '优',
+    marker: {symbol: 'square', fill: '#A7E8B4', radius: 5}
+  },
+  {
+    value: '实际值',
+    marker: {symbol: 'square', fill: '#223273', radius: 5}
+  },
+  {
+    value: '目标值',
+    marker: {
+      symbol: 'line',
+      stroke: '#262626',
+      radius: 5
     }
-  };
+  },
+];
+
+let  y = 0;
+const  yGap = 0.1;
+
+export default {
+  methods: {
+    getStart(i) {
+      const { y, yGap } = this;
+      return {x:0, y: y + i * yGap + i * 0.125};
+    },
+    getEnd(i) {
+      const { y, yGap } = this;
+      return {x: 1, y: y + (i+1) * yGap + i * 0.125};
+    },
+    getScale (item, i) {
+      const ranges = item.ranges;
+      return [{
+        dataKey: 'actual',
+        min: 0,
+        max: ranges[2],
+        nice: false
+      }, {
+        dataKey: 'target',
+        min: 0,
+        max: ranges[2],
+        nice: false
+      }];
+    },
+    getGuide(viewData, guideIndex, position) {
+      const ranges = viewData.ranges;
+      const guide = [
+        {start: [-1, 0], end:[1, ranges[0]]},
+        {start: [-1, ranges[0]], end: [1, ranges[1]]},
+        {start: [-1, ranges[1]], end: [1, ranges[2]]}
+      ];
+      return guide[guideIndex][position];
+    },
+  },
+  data() {
+    return {
+      data,
+      height: 400,
+      scale,
+      colorMap,
+      legendItems,
+      y,
+      yGap,
+    };
+  }
+};
 </script>

@@ -1,106 +1,78 @@
 <template>
-  <div v-if="data.length">
-    <div id="canvas1">
-      <v-chart
-        :forceFit="true"
-        height="400"
-        :animate="false"
-        :padding="[100,40,50,80]"
-        :data="dv"
-        :scale="scale1"
-      >
-        <v-axis></v-axis>
-        <v-area position="date*price" shape="smooth" opacity="0.85"></v-area>
-      </v-chart>
-    </div>
-    <div id="canvas2">
-      <v-chart
-        :forceFit="true"
-        height="100"
-        :padding="[5.40,60,80]"
-        :data="data"
-        :scale="scale2"
-      >
-        <v-axis dataKey="date"></v-axis>
-        <v-axis dataKey="price" :show="false"></v-axis>
-        <v-area position="date*price" :active="false" shape="smooth" opacity="0.85"></v-area>
-        <v-brush type="x" :dragable="true" :onBrushmove="this.handleMove" :onDragmove="this.handleMove"></v-brush>
-      </v-chart>
-    </div>
+  <div>
+    <v-chart :width="640" :height="400" :padding="[0]" :data="data" :scale="scale">
+      <v-tooltip :show-title="false" />
+      <v-coord type="rect" direction="TL" />
+      <v-point position="x*y" color="category" shape="cloud" tooltip="value*category" />
+    </v-chart>
   </div>
 </template>
-
 <script>
+import { registerShape } from 'viser-vue';
+import * as $ from 'jquery';
+const DataSet = require('@antv/data-set');
+
+const scale = [
+  { dataKey: 'x', nice: false },
+  { dataKey: 'y', nice: false },
+];
+
+registerShape('point', 'cloud', {
+  draw(cfg, container) {
+    return container.addShape('text', {
+      attrs: {
+        fillOpacity: cfg.opacity,
+        fontSize: cfg.origin._origin.size,
+        rotate: cfg.origin._origin.rotate,
+        text: cfg.origin._origin.text,
+        textAlign: 'center',
+        fontFamily: cfg.origin._origin.font,
+        fill: cfg.color,
+        textBaseline: 'Alphabetic',
+        ...cfg.style,
+        x: cfg.x,
+        y: cfg.y,
+      },
+    });
+  }
+});
 
 export default {
-  mounted(){
-    $.getJSON('/assets/data/sp500.json',data=>{
-      const ds = new DataSet({
-        state: {
-          dates: null
-        }
-      });
-      const totalDv = ds.createView().source(data);
-      const scale1=[
-        {
-          dataKey:'date',
-          tickCount: 10,
-          type: 'time',
-          mask: 'MMM D YYYY'
-        },
-        {
-          dataKey:'price',
-          min: totalDv.min('price'),
-          max: totalDv.max('price')
-        }
-      ];
-      const scale2=[
-        {
-          dataKey:'date',
-          tickCount: 10,
-          type: 'time',
-          mask: 'YYYY'
-        }
-      ];
-      this.$data.data=data;
-      this.$data.ds=ds;
-      this.$data.scale1=scale1;
-      this.$data.scale2=scale2;
-      this.getDv();
-    });
-  },
-  methods:{
-    getDv(){
-      const {ds,data,date}=this;
-      const dv = ds.createView();
-      dv.source(data).transform({
-        type: 'filter',
-        callback: function callback(obj) {
-          // console.log(obj);
-          if (date.length!==0) {
-            return date.indexOf(obj.date) > -1;
+  mounted() {
+    $.getJSON('/assets/data/world-population.json', (data) => {
+      const dv = new DataSet.View().source(data);
+      const range = dv.range('value');
+      const min = range[0];
+      const max = range[1];
+      dv.transform({
+        type: 'tag-cloud',
+        fields: ['x', 'value'],
+        size: [640, 400],
+        font: 'Verdana',
+        padding: 0,
+        timeInterval: 5000, // max execute time
+        rotate() {
+          let random = ~~(Math.random() * 4) % 4;
+          if (random == 2) {
+            random = 0;
           }
-          return obj;
+          return random * 90; // 0, 90, 270
+        },
+        fontSize(d) {
+          if (d.value) {
+            return ((d.value - min) / (max - min)) * (80 - 24) + 24;
+          }
+          return 0;
         }
       });
-      this.dv=dv;
-    },
-    handleMove(e){
-      const date=e.date;
-      this.date=date;
-      this.getDv();
-    }
+      this.$data.data = dv.rows;
+    });
   },
   data() {
     return {
-      date:[],
-      data:[],
-      ds:{},
-      scale1:[],
-      scale2:[],
-      dv:{} 
+      data: [],
+      scale,
     };
   }
 };
 </script>
-

@@ -1,149 +1,136 @@
 <template>
-  <div>
-    <v-chart :force-fit="true" :height="height" :data="data" :scale="scale" :plotBackground="plotBackground" >
-      <v-tooltip :title="'country'"/>
-      <v-axis :data-key="axis1Opts.dataKey" :label="axis1Opts.label" :grid="axis1Opts.grid" />
-      <v-axis :data-key="axis2Opts.dataKey" :title="axis2Opts.title" :label="axis2Opts.label" />
-      <v-point :position="pointOpts.position" :color="pointOpts.color" :size="pointOpts.size" :label="pointOpts.label" :opacity="pointOpts.opacity" :shape="pointOpts.shape" :tooltip="pointOpts.tooltip" :v-style="pointOpts.style" />
-      <v-guide :type="guide1Opts.type" :top="guide1Opts.top" :start="guide1Opts.start" :end="guide1Opts.end" :text="guide1Opts.text" />
-      <v-guide :type="guide2Opts.type" :top="guide2Opts.top" :start="guide2Opts.start" :end="guide2Opts.end" :text="guide2Opts.text" />
-    </v-chart>
-  </div>
+    <div>
+        <v-chart :forceFit="true" height="400" :data="data" :scale="scale">
+            <v-axis />
+            <v-tooltip :crosshairs="true"></v-tooltip>
+            <v-area position="year*value" color="type" shape="smooth"></v-area>
+            <v-line position="year*value" color="type" size="2" shape="smooth"></v-line>
+        </v-chart>
+    </div>
 </template>
+
 <script>
 const data = [
-  { x: 95, y: 95, z: 13.8, name: 'BE', country: 'Belgium' },
-  { x: 86.5, y: 102.9, z: 14.7, name: 'DE', country: 'Germany' },
-  { x: 80.8, y: 91.5, z: 15.8, name: 'FI', country: 'Finland' },
-  { x: 80.4, y: 102.5, z: 12, name: 'NL', country: 'Netherlands' },
-  { x: 80.3, y: 86.1, z: 11.8, name: 'SE', country: 'Sweden' },
-  { x: 78.4, y: 70.1, z: 16.6, name: 'ES', country: 'Spain' },
-  { x: 74.2, y: 68.5, z: 14.5, name: 'FR', country: 'France' },
-  { x: 73.5, y: 83.1, z: 10, name: 'NO', country: 'Norway' },
-  { x: 71, y: 93.2, z: 24.7, name: 'UK', country: 'United Kingdom' },
-  { x: 69.2, y: 57.6, z: 10.4, name: 'IT', country: 'Italy' },
-  { x: 68.6, y: 20, z: 16, name: 'RU', country: 'Russia' },
-  { x: 65.5, y: 126.4, z: 35.3, name: 'US', country: 'United States' },
-  { x: 65.4, y: 50.8, z: 28.5, name: 'HU', country: 'Hungary' },
-  { x: 63.4, y: 51.8, z: 15.4, name: 'PT', country: 'Portugal' },
-  { x: 64, y: 82.9, z: 31.3, name: 'NZ', country: 'New Zealand' },
-];
-
-const scale = [{
-  dataKey: 'x',
-  alias: 'Daily fat intake', // 定义别名
-  tickInterval: 5, // 自定义刻度间距
-  nice: false, // 不对最大最小值优化
-  max: 96, // 自定义最大值
-  min: 62, // 自定义最小是
-}, {
-  dataKey: 'y',
-  alias: 'Daily sugar intake',
-  tickInterval: 50,
-  nice: false,
-  max: 165,
-  min: 0,
-}, {
-  dataKey: 'z',
-  alias: 'Obesity(adults) %',
-}];
-
-const plotBackground = {
-  stroke: '#ccc',
-  lineWidth: 1,
-};
-
-const axis1Opts = {
-  dataKey: 'x',
-  label: {
-    formatter: function (val) {
-      return val + ' gr';
-    },
+  {
+    year: "1986",
+    ACME: 162,
+    Compitor: 42
   },
-  grid: {
-    lineStyle: {
-      stroke: '#d9d9d9',
-      lineWidth: 1,
-      lineDash: [2, 2],
-    },
+  {
+    year: "1987",
+    ACME: 134,
+    Compitor: 54
   },
-};
-
-const axis2Opts = {
-  dataKey: 'y',
-  title: {
-    offset: 64,
+  {
+    year: "1988",
+    ACME: 116,
+    Compitor: 26
   },
-  label: {
-    formatter: function (val) {
-      if (val > 0) {
-        return val + ' gr';
-      }
-    },
+  {
+    year: "1989",
+    ACME: 122,
+    Compitor: 32
+  },
+  {
+    year: "1990",
+    ACME: 178,
+    Compitor: 68
+  },
+  {
+    year: "1991",
+    ACME: 144,
+    Compitor: 54
+  },
+  {
+    year: "1992",
+    ACME: 125,
+    Compitor: 35
+  },
+  {
+    year: "1993",
+    ACME: 176,
+    Compitor: 66
+  },
+  {
+    year: "1994",
+    ACME: 156
+  },
+  {
+    year: "1995",
+    ACME: 195
+  },
+  {
+    year: "1996",
+    ACME: 215
+  },
+  {
+    year: "1997",
+    ACME: 176,
+    Compitor: 36
+  },
+  {
+    year: "1998",
+    ACME: 167,
+    Compitor: 47
+  },
+  {
+    year: "1999",
+    ACME: 142
+  },
+  {
+    year: "2000",
+    ACME: 117
+  },
+  {
+    year: "2001",
+    ACME: 113,
+    Compitor: 23
+  },
+  {
+    year: "2002",
+    ACME: 132
+  },
+  {
+    year: "2003",
+    ACME: 146,
+    Compitor: 46
+  },
+  {
+    year: "2004",
+    ACME: 169,
+    Compitor: 59
+  },
+  {
+    year: "2005",
+    ACME: 184,
+    Compitor: 44
   }
-};
-
-const pointOpts = {
-  position: 'x*y',
-  color: '#1890ff',
-  size: ['z', [ 10, 40 ]],
-  label: ['name*country', {
-    offset: 0,
-    textStyle: {
-      fill: '#1890FF',
-    },
-  }],
-  opacity: 0.3,
-  shape: 'circle',
-  tooltip: 'x*y*z',
-  style: {
-    lineWidth: 1,
-    stroke: '#1890ff',
+];
+const scale = [
+  {
+    dataKey: "value",
+    alias: "The Share Price in Dollars",
+    formatter: val => "$" + val
   },
-};
-
-const guide1Opts = {
-  type: 'line',
-  top: true,
-  start: [65, 'min'],
-  end: [65, 'max'],
-  text: {
-    content: 'Safe fat intake 65g/day',
-    position: 'end',
-    autoRotate: false,
-    style: {
-      textAlign: 'start',
-    },
-  },
-};
-
-const guide2Opts = {
-  type: 'line',
-  top: true,
-  start: ['min', 50],
-  end: ['max', 50],
-  text: {
-    content: 'Safe sugar intake 50g/day',
-    position: 'end',
-    style: {
-      textAlign: 'end',
-    },
-  },
-};
-
+  {
+    dataKey: "year",
+    range: [0, 1]
+  }
+];
+const dv = new DataSet.View().source(data);
+dv.transform({
+  type: "fold",
+  fields: ["ACME", "Compitor"],
+  key: "type",
+  value: "value"
+});
 export default {
   data() {
-    return {
-      data,
-      scale,
-      height: 400,
-      plotBackground,
-      axis1Opts,
-      axis2Opts,
-      pointOpts,
-      guide1Opts,
-      guide2Opts
-    };
+      return{
+          data:dv,
+          scale
+      }
   }
 };
 </script>
+
