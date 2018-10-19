@@ -1,105 +1,76 @@
 import 'zone.js';
 import 'reflect-metadata';
-import { Component, enableProdMode, NgModule } from '@angular/core';
+import { Component, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { ViserModule } from 'viser-ng';
 import * as $ from 'jquery';
 const DataSet = require('@antv/data-set');
 
-const scale = [{
-  dataKey: 'exp_dat',
-  type: 'time',
-  mask: 'M/YY',
-  tickCount: 14
-}, {
-  dataKey: 'exp_amo',
-  type: 'log',
-  ticks: [225, 1000000 ,2000000 , 4000000, 6000000]
-}];
-
-const axis1Opts = {
-  dataKey: 'exp_dat',
-  tickLine: null,
-  label: {
-    textStyle: {
-      fontSize: 14
-    }
-  }
-};
-
-const axis2Opts = {
-  dataKey: 'exp_amo',
-  tickLine: null,
-  line: null,
-  grid: {
-    lineStyle: {
-      lineDash: null,
-      stroke: '#999'
-    }
-  },
-  label: {
-    formatter: function(val) {
-      let formatted;
-      if (+val === 225) {
-        formatted = 0;
-      } else {
-        formatted = val / 1000000;
-      }
-      return '$' + formatted + 'M';
-    }
-  }
+const series = {
+  0: 'All Industries',
+  32229: 'Nonagriculture, Private Wage and Salary Workers',
+  32230: 'Mining and Extraction',
+  32231: 'Construction',
+  32232: 'Manufacturing',
+  32233: 'Durable goods manufacturing',
+  32234: 'Nondurable goods manufacturing',
+  32235: 'Wholesale and Retail Trade',
+  32236: 'Transportation and Utilities',
+  32237: 'Information',
+  32238: 'Finance',
+  32239: 'Business services',
+  32240: 'Education and Health',
+  32241: 'Leisure and hospitality',
+  32242: 'Other',
+  35109: 'Agriculture',
+  28615: 'Government',
+  35181: 'Self-employed',
 };
 
 @Component({
   selector: '#mount',
   template: `
-  <div>
-    <v-chart [forceFit]="forceFit" [height]="height" [data]="data" [scale]="scale">
-      <v-tooltip [showTitle]="false"></v-tooltip>
-      <v-axis [dataKey]="axis1Opts.dataKey" [tickLine]="axis1Opts.tickLine" [label]="axis1Opts.label"></v-axis>
-      <v-axis [dataKey]="axis2Opts.dataKey" [tickLine]="axis2Opts.tickLine" [line]="axis2Opts.line" [grid]="axis2Opts.grid"
-        [grid]="axis2Opts.grid" [label]="axis2Opts.label"></v-axis>
-      <v-point position="exp_dat*exp_amo" [size]="['exp_amo', [ 1, 10 ]]" [size]="pointOpts.size" opacity="exp_amo" shape="circle" tooltip="exp_dat*can_nam*spe_nam*exp_amo"></v-point>
-    </v-chart>
-  </div>
-  `
+    <div>
+        <v-chart [forceFit]="forceFit" [height]="height" [padding]="20" [scale]="scale" [data]="data">
+            <v-area position="date*rate" color="series" [opacity]="0.85"></v-area>
+        </v-chart>
+    </div>
+    `,
 })
-
 class AppComponent {
   forceFit: boolean = true;
   height: number = 400;
   data = [];
-  scale = scale;
-  axis1Opts = axis1Opts;
-  axis2Opts = axis2Opts;
-
+  scale = [
+    {
+      dataKey: 'date',
+      type: 'time',
+    },
+    {
+      dataKey: 'rate',
+      min: 0,
+    },
+  ];
+  series = series;
   constructor() {
-    $.getJSON('/assets/data/time-scatter.json', (sourceData) => {
+    $.getJSON('/assets/data/unemployment.json', sourceData => {
       const dv = new DataSet.View().source(sourceData);
       dv.transform({
         type: 'map',
-        callback: obj => {
-          obj.exp_amo = obj.exp_amo * 1;
-          return obj;
-        }
+        callback: function callback(row) {
+          row.series = series[row.series];
+          return row;
+        },
       });
-      this.data = dv.rows;
+      this.data = dv;
     });
   }
 }
 
 @NgModule({
-  declarations: [
-    AppComponent
-  ],
-  imports: [
-    BrowserModule,
-    ViserModule
-  ],
+  declarations: [AppComponent],
+  imports: [BrowserModule, ViserModule],
   providers: [],
-  bootstrap: [
-    AppComponent
-  ]
+  bootstrap: [AppComponent],
 })
-export default class AppModule { }
-
+export default class AppModule {}

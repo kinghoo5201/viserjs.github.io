@@ -1,84 +1,52 @@
 <template>
-  <div v-if="Object.keys(graph).length">
-    <v-chart
-      :forceFit="true"
-      height="400"
-      :scale="scale"
-    >
-      <v-tooltip :showTitle="false"></v-tooltip>
-      <v-view :data="dv.edges">
-        <v-sankey position="x*y" shape="arc" color="#bbb" opacity="0.6" tooltip="value"></v-sankey>
-      </v-view>
-      <v-view :data="dv.nodes">
-        <v-polygon position="x*y" color="name" :v-style="{stroke:'#ccc'}"></v-polygon>
-      </v-view>
+  <div>
+    <v-chart :forceFit="true" height="400" :data="data" :padding="[50,40]">
+        <v-axis></v-axis>
+        <v-tooltip></v-tooltip>
+        <v-legend dataKey="type"></v-legend>
+        <v-coord type="polar" startAngle="180" endAngle="270"></v-coord>
+        <v-stack-interval
+          position="type*value"
+          :color="['type', 'rgb(252,143,72)-rgb(255,215,135)']"
+          :label="['value', { offset: -15, label: { textAlign: 'center', fill: '#000' } }]"
+          :style="{ lineWidth: 1, stroke: '#fff' }">
+        </v-stack-interval>
     </v-chart>
   </div>
 </template>
 
 <script>
-import * as $ from 'jquery';
-const DataSet=require('@antv/data-set');
+const data = [
+  {
+    type: "分类一",
+    value: 27
+  },
+  {
+    type: "分类二",
+    value: 25
+  },
+  {
+    type: "分类三",
+    value: 18
+  },
+  {
+    type: "分类四",
+    value: 15
+  },
+  {
+    type: "分类五",
+    value: 10
+  },
+  {
+    type: "Other",
+    value: 5
+  }
+];
 
 export default {
-  mounted(){
-    $.getJSON('/assets/data/energy.json',data=>{
-      const edges = data.links;
-      const graph = {
-        nodes: [],
-        edges: edges
-      };
-      const nodeById = {};
-
-      function addNode(id) {
-        if (!nodeById[id]) {
-          const node = {
-            id: id,
-            name: id
-          };
-          nodeById[id] = node;
-          graph.nodes.push(node);
-        }
-      }
-
-      edges.forEach(function(edge) {
-        addNode(edge.source);
-        addNode(edge.target);
-      });
-      this.$data.graph=graph;
-      this.$data.dv=this.getData();
-    });
-  },
-  methods:{
-    getData(){
-      const { graph }=this;
-      const dv = new DataSet.View().source(graph, {
-        type: 'graph'
-      });
-      dv.transform({
-        type: 'diagram.sankey',
-        nodeId: function nodeId(node) {
-          return node.id;
-        },
-        nodeAlign: 'sankeyLeft',  // change nodeAlign  , available option sankeyLeft / sankeyRight / sankeyCenter / sankeyJustify
-      });
-      return dv;
-    },
-  },
   data() {
     return {
-      graph:{},
-      scale:[
-        {
-          dataKey:'x',
-          sync:true
-        },
-        {
-          dataKey:'y',
-          sync:true
-        }
-      ],
-      dv:{}
+      data: data
     };
   }
 };

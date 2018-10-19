@@ -1,46 +1,81 @@
-import { Chart, Axis, Legend, Tooltip, Coord, Bar, Point, Guide } from 'viser-react';
+import { Chart, Axis, Tooltip, Point, Guide } from 'viser-react';
 import * as React from 'react';
-
-const data = [
-  { "term":"Zombieland","count":9 },
-  { "term":"Wieners","count":8 },
-  { "term":"Toy Story","count":8 },
-  { "term":"trashkannon","count":7 },
-  { "term":"the GROWLERS","count":6 },
-  { "term":"mudweiser","count":6 },
-  { "term":"ThunderCats","count":4 },
-  { "term":"The Taqwacores - Motion Picture","count":4 },
-  { "term":"The Shawshank Redemption","count":2 },
-  { "term":"The Olivia Experiment","count":1 },
-];
+import * as $ from 'jquery';
+import * as _ from 'lodash';
+const DataSet = require('@antv/data-set');
 
 const scale = [{
-  dataKey: 'count',
-  max: 2,
+  dataKey: 'exp_dat',
+  type: 'time',
+  mask: 'M/YY',
+  tickCount: 14
+}, {
+  dataKey: 'exp_amo',
+  type: 'log',
+  ticks: [225, 1000000 ,2000000 , 4000000, 6000000]
 }];
 
+const axis1Opts = {
+  dataKey: 'exp_dat',
+  tickLine: null,
+  label: {
+    textStyle: {
+      fontSize: 14
+    }
+  }
+};
+
+const axis2Opts = {
+  dataKey: 'exp_amo',
+  tickLine: null,
+  line: null,
+  grid: {
+    lineStyle: {
+      lineDash: null,
+      stroke: '#999'
+    }
+  },
+  label: {
+    formatter: function(val) {
+      let formatted;
+      if (+val === 225) {
+        formatted = 0;
+      } else {
+        formatted = val / 1000000;
+      }
+      return '$' + formatted + 'M';
+    }
+  }
+};
+
 export default class App extends React.Component {
+  state = {
+    data: [],
+  };
+
+  componentDidMount() {
+    $.getJSON('/assets/data/time-scatter.json', (sourceData) => {
+      const dv = new DataSet.View().source(sourceData);
+      dv.transform({
+        type: 'map',
+        callback: obj => {
+          obj.exp_amo = obj.exp_amo * 1;
+          return obj;
+        }
+      });
+      this.setState({data: dv.rows});
+    })
+  }
+
   render() {
+    const  { data } = this.state;
     return (
       <div>
-        <Chart forceFit height={400} padding={[20, 80]} data={data} scale={scale}>
-          <Tooltip />
-          <Coord type="theta" innerRadius={0.2} startAngle={-90} endAngle={180} />
-          <Bar position="term*count" color="#8543e0" shape="line" select={false} style={{ lineAppendWidth: 10 }} />
-          <Point position="term*count" color="#8543e0" shape="circle"/>
-          {
-            data.map((obj: any) => {
-              const position = [obj.term, 0];
-              const content = obj.term.toString();
-
-              return (<Guide key={content} type="text" position={position} content={content} style={{textAlign: 'right'}}/>)
-            })
-          }
-          <Guide type="text" position={[ '50%', '50%' ]} content="Music" style={{
-            textAlign: 'center',
-            fontSize: 24,
-            fill: '#8543e0',
-          }} />
+        <Chart forceFit height={400} data={data} scale={scale}>
+          <Tooltip showTitle={false} />
+          <Axis {...axis1Opts} />
+          <Axis {...axis2Opts} />
+          <Point position='exp_dat*exp_amo' size={['exp_amo', [ 1, 10 ]]} opacity='exp_amo' shape='circle' tooltip='exp_dat*can_nam*spe_nam*exp_amo' />
         </Chart>
       </div>
     );

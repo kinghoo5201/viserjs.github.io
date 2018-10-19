@@ -1,219 +1,102 @@
 <template>
   <div>
-    <v-chart :forceFit="true" :height="height" :padding="padding" :scale="scale">
+    <v-chart :force-fit="true" :height="height" :padding="[ 20, 80, 150 ]" :data="data" :scale="scale">
       <v-tooltip />
-      <v-view :data="viewData1">
-        <v-line position="date*pv*count" color="#4FAAEB"/>
-        <v-line position="date*time" color="#9AD681"/>
-        <v-axis dataKey="time" :grid="grid"/>
-      </v-view>
-      <v-view :data="viewData2">
-        <v-tooltip :show="ifShow"/>
-        <v-line position="date*time" color="white" :v-style="lineStyles"/>
-      </v-view>
+      <v-legend :slidable="false" :width="165" :item-formatter="itemFormatter" />
+      <v-axis data-key="name" :grid="null" />
+      <v-axis data-key="time" :line="null" :tick-line="null" />
+      <v-polygon position="time*name"
+        :color="['value','rgb(215, 25, 28)-rgb(231, 104, 24)-rgb(242, 158, 46)-rgb(249, 208, 87)-rgb(255, 255, 140)-rgb(144, 235, 157)-rgb(0, 204, 188)-rgb(0, 166, 202)-rgb(44, 123, 182)']"
+        :size="['value', function(size) {
+          return size;
+        }]"
+        shape="custom"
+        :v-style="{
+          lineWidth:1,
+          stroke: '#fff'
+        }"
+      />
     </v-chart>
   </div>
 </template>
 
 <script>
+import * as $ from 'jquery';
+import { registerShape } from 'viser-vue';
 const DataSet = require('@antv/data-set');
-const second = 1000;
-const minute = 1000 * 60;
-const hour = 60 * minute;
-const day = 24 * hour;
 
-function toInterge(number) {
-  const fix = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
-
-  if (Math.round(number) === number) {
-    return '' + number;
-  }
-  return '' + Number(number).toFixed(fix);
-}
-
-function humanizeDuration(duration) {
-  const fix = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
-
-  if (duration === 0) {
-    return 0;
-  }
-  if (duration < minute) {
-    return toInterge(duration / second, fix) + ' 秒';
-  }
-  if (duration < hour) {
-    return toInterge(duration / minute, fix) + ' 分';
-  }
-  if (duration < day) {
-    return toInterge(duration / hour, fix) + '小时';
-  }
-  return toInterge(duration / hour / 24, fix) + ' 天';
-}
-
-  const data = [{
-    "date": 1489593600000,
-    "pv": 17,
-    "successRate": 0.23529411764705882,
-    "time": 12351000,
-    "count": 4
-  }, {
-    "date": 1489680000000,
-    "pv": 10,
-    "successRate": 0.6,
-    "time": 18000,
-    "count": 6
-  }, {
-    "date": 1489766400000,
-    "pv": 3,
-    "successRate": 0,
-    "time": 0,
-    "count": 0
-  }, {
-    "date": 1489852800000,
-    "pv": 3,
-    "successRate": 0,
-    "time": 0,
-    "count": 0
-  }, {
-    "date": 1489939200000,
-    "pv": 18,
-    "successRate": 0.2222222222222222,
-    "time": 21157000,
-    "count": 4
-  }, {
-    "date": 1490025600000,
-    "pv": 32,
-    "successRate": 0.25,
-    "time": 3543000,
-    "count": 8
-  }, {
-    "date": 1490112000000,
-    "pv": 25,
-    "successRate": 0.56,
-    "time": 10000,
-    "count": 14
-  }, {
-    "date": 1490198400000,
-    "pv": 23,
-    "successRate": 0.43478260869565216,
-    "time": 24000,
-    "count": 10
-  }, {
-    "date": 1490284800000,
-    "pv": 7,
-    "successRate": 0.2857142857142857,
-    "time": 0,
-    "count": 2
-  }];
-
-  const dash = [{
-    "count": 4,
-    "date": 1489593600000,
-    "time": null
-  }, {
-    "count": 6,
-    "date": 1489680000000,
-    "time": 18000
-  }, {
-    "count": 0,
-    "date": 1489766400000,
-    "time": 0
-  }, {
-    "count": 0,
-    "date": 1489852800000,
-    "time": 0
-  }, {
-    "count": 4,
-    "date": 1489939200000,
-    "time": 21157000
-  }, {
-    "count": 8,
-    "date": 1490025600000,
-    "time": null
-  }, {
-    "count": 14,
-    "date": 1490112000000,
-    "time": null
-  }, {
-    "count": 10,
-    "date": 1490198400000,
-    "time": 24000
-  }, {
-    "count": 2,
-    "date": 1490284800000,
-    "time": 0
-  }];
-
-  function pick(data, field) {
-    return data.map(function(item) {
-      const result = {};
-      for (let key in item) {
-        if (item.hasOwnProperty(key) && field.indexOf(key) !== -1) {
-          result[key] = item[key];
-        }
+registerShape('polygon', 'custom', {
+  draw: function(cfg, container) {
+    const points = this.parsePoints(cfg.points);
+    const startX = points[1].x;
+    const startY = points[1].y;
+    const size = cfg.size || 1;
+    const width = (points[2].x - points[1].x);
+    const height = Math.abs(points[1].y - points[0].y);
+    // 绘制背景
+    container.addShape('rect', {
+      attrs: {
+        x: startX,
+        y: startY,
+        width: width,
+        height: height
       }
-      return result;
+    });
+    // 绘制色块
+    return container.addShape('rect', {
+      attrs: {
+        x: startX,
+        y: startY,
+        width: width * size,
+        height: height,
+        fill: cfg.color,
+        stroke: '#fff'
+      }
     });
   }
+});
 
-const padding = [20, 80, 80, 80];
-const height = 400;
-const scale = [
-    {
-        dataKey: 'date',
-        alias: '日期',
-        type: 'time',
-        mask: 'MM-DD' 
-    },
-    {
-        dataKey: 'pv',
-        alias: '进入次数',
-        min: 0 
-    },
-    {
-        dataKey: 'count',
-        alias: '次数'
-    },
-    {
-        dataKey: 'time',
-        alias: '平均时长',
-        formatter: function formatter(value) {
-          return humanizeDuration(value, 0);
-        }
-    }
-];
+// 模拟各个系统的单元测试覆盖率数据
+const data = [];
+// 生成数据
+for(let i = 0; i < 15; i++){
+  const name = '系统'+i;
+  const value = Math.random() * 90;
+  for(let j =1; j < 10;j++){
+    const obj = {};
+    obj.name = name;
+    obj.value = (value + Math.random() * 10) / 100;
+    obj.time = '10-0' + j;
+    data.push(obj);
+  }
+}
 
-const view1 = new DataSet.View()
+const scale = [{
+  dataKey: 'time',
+  type: 'cat'
+}, {
+  dataKey: 'value',
+  alias: '覆盖率',
+  type: 'linear',
+  formatter:function(value){
+    return (value * 100).toFixed(2) + '%';
+  },
+  min:0,
+  max: 1
+}];
 
-view1.source(pick(data, ['pv','time','date']));
-
-const viewData1 = view1.rows;
-
-const view2 = new DataSet.View()
-
-view2.source(pick(dash, ['pv','time','date']));
-
-const viewData2 = view2.rows;
-
-const lineStyles = {
-    lineDash: [4, 4]
+const itemFormatter = val => {
+  return val.slice(0, val.indexOf('.')) + '%';
 };
 
-const ifShow = false;
-
-const grid= null;
-
-  export default {
-    data() {
-      return {
-        viewData1,
-        viewData2,
-        scale,
-        padding,
-        height,
-        lineStyles,
-        ifShow,
-        grid
-      };
-    }
-  };
+export default {
+  data() {
+    return {
+      data,
+      height: 400,
+      scale,
+      itemFormatter,
+    };
+  }
+};
 </script>

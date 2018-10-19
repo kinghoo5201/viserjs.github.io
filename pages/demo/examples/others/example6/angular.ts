@@ -1,105 +1,216 @@
 import 'zone.js';
 import 'reflect-metadata';
-import { Component, enableProdMode, NgModule } from '@angular/core';
+import { Component, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { ViserModule, registerShape } from 'viser-ng';
-import * as $ from 'jquery';
+import { ViserModule } from 'viser-ng';
 const DataSet = require('@antv/data-set');
 
-registerShape('point', 'cloud', {
-  draw(cfg, container) {
-    return container.addShape('text', {
-      attrs: {
-        fillOpacity: cfg.opacity,
-        fontSize: cfg.origin._origin.size,
-        rotate: cfg.origin._origin.rotate,
-        text: cfg.origin._origin.text,
-        textAlign: 'center',
-        fontFamily: cfg.origin._origin.font,
-        fill: cfg.color,
-        textBaseline: 'Alphabetic',
-        ...cfg.style,
-        x: cfg.x,
-        y: cfg.y,
-      },
-    });
-  }
-});
+const DataView = DataSet.DataView;
 
-const scale = [
-  { dataKey: 'x', nice: false },
-  { dataKey: 'y', nice: false },
+const data = [
+  {
+    group: 'All Survey Responses',
+    type: 'All Survey Responses',
+    total: 565,
+    'Strongly Agree': 50.1,
+    Agree: 40.7,
+    'No Opinion': 4.8,
+    Disagree: 3.7,
+    'Strongly Disagree': 0.7,
+  },
+  {
+    group: 'Employment sector',
+    type: 'Academic(nonstudent)',
+    total: 253,
+    'Strongly Agree': 64.0,
+    Agree: 30.8,
+    'No Opinion': 3.2,
+    Disagree: 2.0,
+    'Strongly Disagree': 0.0,
+  },
+  {
+    group: 'Employment sector',
+    type: 'Business and industry',
+    total: 176,
+    'Strongly Agree': 40.6,
+    Agree: 50.0,
+    'No Opinion': 2.8,
+    Disagree: 6.3,
+    'Strongly Disagree': 0.0,
+  },
+  {
+    group: 'Employment sector',
+    type: 'Federal, state, and local government',
+    total: 71,
+    'Strongly Agree': 38.0,
+    Agree: 47.9,
+    'No Opinion': 7.0,
+    Disagree: 4.2,
+    'Strongly Disagree': 2.8,
+  },
+  {
+    group: 'Employment sector',
+    type: 'Private consultant/self-employed',
+    total: 28,
+    'Strongly Agree': 39.3,
+    Agree: 53.6,
+    'No Opinion': 7.1,
+    Disagree: 0.0,
+    'Strongly Disagree': 0.0,
+  },
+  {
+    group: 'Employment sector',
+    type: 'Other',
+    total: 34,
+    'Strongly Agree': 29.4,
+    Agree: 44.1,
+    'No Opinion': 14.7,
+    Disagree: 5.9,
+    'Strongly Disagree': 5.9,
+  },
+  {
+    group: 'Race',
+    type: 'White',
+    total: 400,
+    'Strongly Agree': 50.0,
+    Agree: 41.8,
+    'No Opinion': 4.5,
+    Disagree: 2.8,
+    'Strongly Disagree': 1.0,
+  },
+  {
+    group: 'Race',
+    type: 'Asian',
+    total: 122,
+    'Strongly Agree': 53.3,
+    Agree: 40.2,
+    'No Opinion': 3.3,
+    Disagree: 3.3,
+    'Strongly Disagree': 0.0,
+  },
+  {
+    group: 'Race',
+    type: 'Black or African American',
+    total: 10,
+    'Strongly Agree': 40.0,
+    Agree: 30.0,
+    'No Opinion': 20.0,
+    Disagree: 10.0,
+    'Strongly Disagree': 0.0,
+  },
+  {
+    group: 'Race',
+    type: 'Other',
+    total: 17,
+    'Strongly Agree': 47.1,
+    Agree: 35.3,
+    'No Opinion': 5.9,
+    Disagree: 11.8,
+    'Strongly Disagree': 0.7,
+  },
+  {
+    group: 'Education',
+    type: "Associate's and Bachelor's",
+    total: 175,
+    'Strongly Agree': 37.1,
+    Agree: 49.1,
+    'No Opinion': 5.7,
+    Disagree: 6.9,
+    'Strongly Disagree': 1.1,
+  },
+  {
+    group: 'Education',
+    type: "Master's and Above",
+    total: 388,
+    'Strongly Agree': 55.9,
+    Agree: 36.9,
+    'No Opinion': 4.4,
+    Disagree: 2.3,
+    'Strongly Disagree': 0.5,
+  },
+  {
+    group: 'Gender',
+    type: 'Male',
+    total: 356,
+    'Strongly Agree': 50.6,
+    Agree: 41,
+    'No Opinion': 4.2,
+    Disagree: 3.4,
+    'Strongly Disagree': 0.8,
+  },
+  {
+    group: 'Gender',
+    type: 'Female',
+    total: 200,
+    'Strongly Agree': 51.0,
+    Agree: 39.0,
+    'No Opinion': 6.0,
+    Disagree: 3.5,
+    'Strongly Disagree': 0.5,
+  },
 ];
 
-const padding = [0];
+const dv = new DataView();
+dv.source(data)
+  .transform({
+    type: 'map',
+    callback: function callback(row) {
+      row['Strongly Disagree'] *= -1;
+      row['Disagree'] *= -1;
+      return row;
+    },
+  })
+  .transform({
+    type: 'fold',
+    fields: [
+      'Disagree',
+      'Strongly Disagree',
+      'No Opinion',
+      'Agree',
+      'Strongly Agree',
+    ],
+    key: 'opinion',
+    value: 'value',
+    retains: ['group', 'type'],
+  });
+
+const colorMap = {
+  'Strongly Agree': '#3561A7',
+  Agree: '#80B2D3',
+  'No Opinion': '#D9F0F6',
+  Disagree: '#EC7743',
+  'Strongly Disagree': '#CB2920',
+};
 
 @Component({
   selector: '#mount',
   template: `
-  <div >
-    <v-chart [width]="640" [height]="400" [data]="data" [scale]="scale" [padding]="padding">
-      <v-tooltip [showTitle]="false"></v-tooltip>
-      <v-coord type="rect" direction="TL"></v-coord>
-      <v-point position="x*y" color="text" shape="cloud" tooltip="value*category"></v-point>
-    </v-chart>
-  </div>
-  `
+    <div>
+      <v-chart [forceFit]="forceFit" [height]="height" [data]="data" padding="auto">
+        <v-tooltip></v-tooltip>
+        <v-legend dataKey="fold"></v-legend>
+        <v-coord type="rect" direction="LB"></v-coord>
+        <v-axis dataKey="type" [label]="label1" [title]="nullVal"></v-axis>
+        <v-axis dataKey="value" position="right" [title]="nullVal" [tickLine]="nullVal" [label]="label2"></v-axis>
+        <v-stack-bar position="type*value" [color]="color"></v-stack-bar>
+      </v-chart>
+    </div>
+  `,
 })
 class AppComponent {
-  scale = scale;
-  data = [];
-
-  constructor() {
-    $.getJSON('/assets/data/antv-keywords.json', (data) => {
-      const dv = new DataSet.View().source(data);
-      const range = dv.range('value');
-      const min = range[0];
-      const max = range[1];
-      const imageMask = new Image();
-      imageMask.crossOrigin = '';
-      imageMask.src = '/assets/image/logo-mask-16x9.png';
-      imageMask.onload = () => {
-        dv.transform({
-          type: 'tag-cloud',
-          fields: ['name', 'value'],
-          imageMask,
-          size: [640, 400],
-          font: 'Verdana',
-          padding: 0,
-          timeInterval: 5000, // max execute time
-          rotate() {
-            let random = ~~(Math.random() * 4) % 4;
-            if (random == 2) {
-              random = 0;
-            }
-            return random * 90; // 0, 90, 270
-          },
-          fontSize(d) {
-            if (d.value) {
-              return ((d.value - min) / (max - min)) * (32 - 8) + 8;
-            }
-            return 0;
-          }
-        });
-
-        this.data = dv.rows;
-      }
-    });
-  }
+  forceFit: boolean = true;
+  height: number = 500;
+  data: any = dv;
+  label1: any = { offset: 10 };
+  nullVal: null = null;
+  label2: any = { formatter: val => val + '%' };
+  color: any = ['opinion', opinion => colorMap[opinion]];
 }
 
 @NgModule({
-  declarations: [
-    AppComponent
-  ],
-  imports: [
-    BrowserModule,
-    ViserModule
-  ],
+  declarations: [AppComponent],
+  imports: [BrowserModule, ViserModule],
   providers: [],
-  bootstrap: [
-    AppComponent
-  ]
+  bootstrap: [AppComponent],
 })
-export default class AppModule { }
-
+export default class AppModule {}

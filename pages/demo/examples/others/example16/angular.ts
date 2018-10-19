@@ -2,57 +2,88 @@ import 'zone.js';
 import 'reflect-metadata';
 import { Component, enableProdMode, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { ViserModule } from 'viser-ng';
+import { ViserModule, registerShape } from 'viser-ng';
 import * as $ from 'jquery';
+const DataSet = require('@antv/data-set');
 
-const values = ['Mon.', 'Tue.', 'Wed.', 'Thu.', 'Fri.', 'Sat.', 'Sun.'];
+registerShape('point', 'cloud', {
+  draw(cfg, container) {
+    return container.addShape('text', {
+      attrs: {
+        fillOpacity: cfg.opacity,
+        fontSize: cfg.origin._origin.size,
+        rotate: cfg.origin._origin.rotate,
+        text: cfg.origin._origin.text,
+        textAlign: 'center',
+        fontFamily: cfg.origin._origin.font,
+        fill: cfg.color,
+        textBaseline: 'Alphabetic',
+        ...cfg.style,
+        x: cfg.x,
+        y: cfg.y,
+      },
+    });
+  }
+});
+
+const scale = [
+  { dataKey: 'x', nice: false },
+  { dataKey: 'y', nice: false },
+];
+
+const padding = [0];
 
 @Component({
   selector: '#mount',
   template: `
-  <div>
-    <v-chart [forceFit]="forceFit" [height]="height" padding="40" [data]="data">
-      <v-tooltip [showTitle]="null"></v-tooltip>
-      <v-coord type="polar" innerRadius="0.2"></v-coord>
-      <v-axis dataKey="week" [grid]="null" [line]="null" [tickLine]="null" [label]="null"></v-axis>
-      <v-axis dataKey="time" [grid]="null" [line]="null" [tickLine]="null" [label]="timeAxis"></v-axis>
-      <v-polygon
-        position="time*week"
-        [color]="['value', '#BAE7FF-#1890FF-#0050B3']"
-        tooltip="week*time*value"
-        [style]="polygonStyle">
-      </v-polygon>
-      <v-guide *ngFor="let val of values; let idx = index;"
-        type="text"
-        top="true"
-        [position]="[0, idx]"
-        [content]="val"
-        [style]="guideStyle">
-      </v-guide>
+  <div >
+    <v-chart [width]="640" [height]="400" [data]="data" [scale]="scale" [padding]="padding">
+      <v-tooltip [showTitle]="false"></v-tooltip>
+      <v-coord type="rect" direction="TL"></v-coord>
+      <v-point position="x*y" color="text" shape="cloud" tooltip="value*category"></v-point>
     </v-chart>
   </div>
   `
 })
 class AppComponent {
-  forceFit: boolean = true;
-  height: number = 400;
-  values = values;
+  scale = scale;
   data = [];
-  polygonStyle = {
-    stroke: '#fff',
-    lineWidth: 1,
-  };
-  timeAxis = { offset: 3 };
-  guideStyle = {
-    fill: '#fff',
-    textAlign: 'center',
-    shadowBlur: 2,
-    shadowColor: 'rgba(0, 0, 0, .45)'
-  };
 
   constructor() {
-    $.getJSON('/assets/data/polar-heatmap.json', (data) => {
-      this.data = data;
+    $.getJSON('/assets/data/antv-keywords.json', (data) => {
+      const dv = new DataSet.View().source(data);
+      const range = dv.range('value');
+      const min = range[0];
+      const max = range[1];
+      const imageMask = new Image();
+      imageMask.crossOrigin = '';
+      imageMask.src = '/assets/image/logo-mask-16x9.png';
+      imageMask.onload = () => {
+        dv.transform({
+          type: 'tag-cloud',
+          fields: ['name', 'value'],
+          imageMask,
+          size: [640, 400],
+          font: 'Verdana',
+          padding: 0,
+          timeInterval: 5000, // max execute time
+          rotate() {
+            let random = ~~(Math.random() * 4) % 4;
+            if (random == 2) {
+              random = 0;
+            }
+            return random * 90; // 0, 90, 270
+          },
+          fontSize(d) {
+            if (d.value) {
+              return ((d.value - min) / (max - min)) * (32 - 8) + 8;
+            }
+            return 0;
+          }
+        });
+
+        this.data = dv.rows;
+      }
     });
   }
 }
@@ -71,3 +102,4 @@ class AppComponent {
   ]
 })
 export default class AppModule { }
+

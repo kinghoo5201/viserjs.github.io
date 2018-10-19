@@ -1,72 +1,78 @@
 <template>
   <div>
-    <v-chart :forceFit="true" :height="height" :data="data" :scale="scale" :padding="0">
-      <v-tooltip/>
-      <v-interval
-        :shape="['path',path=>['liquid-fill-path',path]]"
-        position="gender*value"
-        color="gender"
-        :v-style="{
-          lineWidth: 10,
-          opacity: 0.75
-        }"
-        :tooltip="[
-          'gender*value',
-          (gender, value) => {
-            return {
-              name: gender,
-              value,
-            };
-          },
-        ]"
-      />
-      <v-guide
-        v-for="(row, index) in data"
-        :key="index"
-        type="text"
-        :top="true"
-        :position="{
-          gender: row.gender,
-          value: 45
-        }"
-        :content="row.value + '%'"
-        :v-style="{
-          fontSize: 100,
-          textAlign: 'center',
-          opacity: 0.75,
-        }"
-      />
+    <v-chart :forceFit="true" height="400" :data="data" >
+      <v-tooltip></v-tooltip>
+      <v-legend dataKey="type"></v-legend>
+      <v-coord type="theta" radius="0.8"></v-coord>
+      <v-pie position="value" label="type" color="type" shape="triangleShape"></v-pie>
     </v-chart>
   </div>
 </template>
 
 <script>
-  const data = [{
-    gender: 'male',
-    path: 'M381.759 0h292l-.64 295.328-100.127-100.096-94.368 94.368C499.808 326.848 512 369.824 512 415.712c0 141.376-114.56 256-256 256-141.376 0-256-114.624-256-256s114.624-256 256-256c48.8 0 94.272 13.92 133.12 37.632l93.376-94.592L381.76 0zM128.032 415.744c0 70.688 57.312 128 128 128s128-57.312 128-128-57.312-128-128-128-128 57.312-128 128z',
-    value: 50
-  }, {
-    gender: 'middle',
-    path: 'M381.759 0h292l-.64 295.328-100.127-100.096-94.368 94.368C499.808 326.848 512 369.824 512 415.712c0 141.376-114.56 256-256 256-141.376 0-256-114.624-256-256s114.624-256 256-256c48.8 0 94.272 13.92 133.12 37.632l93.376-94.592L381.76 0zM128.032 415.744c0 70.688 57.312 128 128 128s128-57.312 128-128-57.312-128-128-128-128 57.312-128 128z',
-    value: 25
-  }, {
-    gender: 'female',
-    path: 'M320.96 503.232v105.376h127.872V736.48H320.96v127.872H191.136V736.48H63.296V608.608h127.84v-105.76C81.216 474.208 0 374.56 0 255.712 0 114.496 114.496 0 255.712 0c141.248 0 255.68 114.496 255.68 255.712 0 119.328-79.872 219.264-190.432 247.52zm-65.248-375.36c-70.624 0-127.872 57.216-127.872 127.84 0 70.592 57.248 127.84 127.872 127.84s127.872-57.248 127.872-127.84c0-70.624-57.248-127.84-127.872-127.84z',
-    value: 25
-  }];
-  const scale = [{
-    dataKey: 'value',
-    min: 0,
-    max: 100,
-  }];
+const data = [{
+    type: '分类一',
+    value: 20
+}, {
+    type: '分类二',
+    value: 18
+}, {
+    type: '分类三',
+    value: 32
+}, {
+    type: '分类四',
+    value: 15
+}, {
+    type: 'Other',
+    value: 15
+}];
 
-  export default {
-    data() {
-      return {
-        data,
-        scale,
-        height: 400,
-      };
+// 根据比例，获取两点之间的点
+function getPoint(p0, p1, ratio) {
+    return {
+        x: (1 - ratio) * p0.x + ratio * p1.x,
+        y: (1 - ratio) * p0.y + ratio * p1.y
+    };
+}
+const pointRatio = 0.7; // 设置开始变成三角形的位置 0.7
+
+
+// 自定义 other 的图形，增加两条线
+ViserVue.registerShape('interval', 'triangleShape', {
+    draw: function draw(cfg, container) {
+        let centerPoint = {
+            x: cfg.points[3].x,
+            y: (cfg.points[2].y + cfg.points[3].y) / 2
+        };
+        centerPoint = this.parsePoint(centerPoint);
+
+        const points = this.parsePoints(cfg.points);
+        const tmpPoint1 = getPoint(points[0], points[3], pointRatio);
+        const tmpPoint2 = getPoint(points[1], points[2], pointRatio);
+        const path = [];
+        path.push(['M', points[0].x, points[0].y]);
+        path.push(['L', points[1].x, points[1].y]);
+        path.push(['L', tmpPoint2.x, tmpPoint2.y]);
+        path.push(['L', centerPoint.x, centerPoint.y]);
+        path.push(['L', tmpPoint1.x, tmpPoint1.y]);
+        path.push('Z');
+        return container.addShape('path', {
+            attrs: {
+                fill: cfg.color,
+                path: path,
+                lineWidth: 1,
+                stroke: 'white'
+            }
+        });
     }
-  };
+});
+
+export default {
+  data() {
+    return {
+      data: data,
+    };
+  }
+};
 </script>
+

@@ -1,61 +1,218 @@
 <template>
   <div>
-    <v-chart :forceFit="true" :height="height" :data="data" :scale="scale" :padding="0">
-      <v-tooltip/>
-      <v-interval
-        shape="liquid-fill-gauge"
-        position="gender*value"
-        color="gender"
-        :v-style="{
-            lineWidth: 10,
-            opacity: 0.75
-        }"
-      />
-      <v-guide
-        v-for="(row, index) in data"
-        :key="index"
-        type="text"
-        :top="true"
-        :position="{
-            gender: row.gender,
-            value: 50
-        }"
-        :content="row.value + '%'"
-        :v-style="{
-            fontSize: 40,
-            textAlign: 'center'
-        }"
-      />
+    <v-chart :forceFit="true" :height="height" :padding="padding" :scale="scale">
+      <v-tooltip />
+      <v-view :data="viewData1">
+        <v-line position="date*pv*count" color="#4FAAEB"/>
+        <v-line position="date*time" color="#9AD681"/>
+        <v-axis dataKey="time" :grid="grid"/>
+      </v-view>
+      <v-view :data="viewData2">
+        <v-tooltip :show="ifShow"/>
+        <v-line position="date*time" color="white" :v-style="lineStyles"/>
+      </v-view>
     </v-chart>
   </div>
 </template>
 
 <script>
+const DataSet = require('@antv/data-set');
+const second = 1000;
+const minute = 1000 * 60;
+const hour = 60 * minute;
+const day = 24 * hour;
+
+function toInterge(number) {
+  const fix = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
+
+  if (Math.round(number) === number) {
+    return '' + number;
+  }
+  return '' + Number(number).toFixed(fix);
+}
+
+function humanizeDuration(duration) {
+  const fix = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
+
+  if (duration === 0) {
+    return 0;
+  }
+  if (duration < minute) {
+    return toInterge(duration / second, fix) + ' 秒';
+  }
+  if (duration < hour) {
+    return toInterge(duration / minute, fix) + ' 分';
+  }
+  if (duration < day) {
+    return toInterge(duration / hour, fix) + '小时';
+  }
+  return toInterge(duration / hour / 24, fix) + ' 天';
+}
+
   const data = [{
-    gender: 'male',
-    path: 'M381.759 0h292l-.64 295.328-100.127-100.096-94.368 94.368C499.808 326.848 512 369.824 512 415.712c0 141.376-114.56 256-256 256-141.376 0-256-114.624-256-256s114.624-256 256-256c48.8 0 94.272 13.92 133.12 37.632l93.376-94.592L381.76 0zM128.032 415.744c0 70.688 57.312 128 128 128s128-57.312 128-128-57.312-128-128-128-128 57.312-128 128z',
-    value: 50
+    "date": 1489593600000,
+    "pv": 17,
+    "successRate": 0.23529411764705882,
+    "time": 12351000,
+    "count": 4
   }, {
-    gender: 'middle',
-    path: 'M381.759 0h292l-.64 295.328-100.127-100.096-94.368 94.368C499.808 326.848 512 369.824 512 415.712c0 141.376-114.56 256-256 256-141.376 0-256-114.624-256-256s114.624-256 256-256c48.8 0 94.272 13.92 133.12 37.632l93.376-94.592L381.76 0zM128.032 415.744c0 70.688 57.312 128 128 128s128-57.312 128-128-57.312-128-128-128-128 57.312-128 128z',
-    value: 25
+    "date": 1489680000000,
+    "pv": 10,
+    "successRate": 0.6,
+    "time": 18000,
+    "count": 6
   }, {
-    gender: 'female',
-    path: 'M320.96 503.232v105.376h127.872V736.48H320.96v127.872H191.136V736.48H63.296V608.608h127.84v-105.76C81.216 474.208 0 374.56 0 255.712 0 114.496 114.496 0 255.712 0c141.248 0 255.68 114.496 255.68 255.712 0 119.328-79.872 219.264-190.432 247.52zm-65.248-375.36c-70.624 0-127.872 57.216-127.872 127.84 0 70.592 57.248 127.84 127.872 127.84s127.872-57.248 127.872-127.84c0-70.624-57.248-127.84-127.872-127.84z',
-    value: 25
+    "date": 1489766400000,
+    "pv": 3,
+    "successRate": 0,
+    "time": 0,
+    "count": 0
+  }, {
+    "date": 1489852800000,
+    "pv": 3,
+    "successRate": 0,
+    "time": 0,
+    "count": 0
+  }, {
+    "date": 1489939200000,
+    "pv": 18,
+    "successRate": 0.2222222222222222,
+    "time": 21157000,
+    "count": 4
+  }, {
+    "date": 1490025600000,
+    "pv": 32,
+    "successRate": 0.25,
+    "time": 3543000,
+    "count": 8
+  }, {
+    "date": 1490112000000,
+    "pv": 25,
+    "successRate": 0.56,
+    "time": 10000,
+    "count": 14
+  }, {
+    "date": 1490198400000,
+    "pv": 23,
+    "successRate": 0.43478260869565216,
+    "time": 24000,
+    "count": 10
+  }, {
+    "date": 1490284800000,
+    "pv": 7,
+    "successRate": 0.2857142857142857,
+    "time": 0,
+    "count": 2
   }];
-  const scale = [{
-    dataKey: 'value',
-    min: 0,
-    max: 100,
+
+  const dash = [{
+    "count": 4,
+    "date": 1489593600000,
+    "time": null
+  }, {
+    "count": 6,
+    "date": 1489680000000,
+    "time": 18000
+  }, {
+    "count": 0,
+    "date": 1489766400000,
+    "time": 0
+  }, {
+    "count": 0,
+    "date": 1489852800000,
+    "time": 0
+  }, {
+    "count": 4,
+    "date": 1489939200000,
+    "time": 21157000
+  }, {
+    "count": 8,
+    "date": 1490025600000,
+    "time": null
+  }, {
+    "count": 14,
+    "date": 1490112000000,
+    "time": null
+  }, {
+    "count": 10,
+    "date": 1490198400000,
+    "time": 24000
+  }, {
+    "count": 2,
+    "date": 1490284800000,
+    "time": 0
   }];
+
+  function pick(data, field) {
+    return data.map(function(item) {
+      const result = {};
+      for (let key in item) {
+        if (item.hasOwnProperty(key) && field.indexOf(key) !== -1) {
+          result[key] = item[key];
+        }
+      }
+      return result;
+    });
+  }
+
+const padding = [20, 80, 80, 80];
+const height = 400;
+const scale = [
+    {
+        dataKey: 'date',
+        alias: '日期',
+        type: 'time',
+        mask: 'MM-DD' 
+    },
+    {
+        dataKey: 'pv',
+        alias: '进入次数',
+        min: 0 
+    },
+    {
+        dataKey: 'count',
+        alias: '次数'
+    },
+    {
+        dataKey: 'time',
+        alias: '平均时长',
+        formatter: function formatter(value) {
+          return humanizeDuration(value, 0);
+        }
+    }
+];
+
+const view1 = new DataSet.View()
+
+view1.source(pick(data, ['pv','time','date']));
+
+const viewData1 = view1.rows;
+
+const view2 = new DataSet.View()
+
+view2.source(pick(dash, ['pv','time','date']));
+
+const viewData2 = view2.rows;
+
+const lineStyles = {
+    lineDash: [4, 4]
+};
+
+const ifShow = false;
+
+const grid= null;
 
   export default {
     data() {
       return {
-        data,
+        viewData1,
+        viewData2,
         scale,
-        height: 400,
+        padding,
+        height,
+        lineStyles,
+        ifShow,
+        grid
       };
     }
   };

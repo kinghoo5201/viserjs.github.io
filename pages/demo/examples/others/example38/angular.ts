@@ -1,76 +1,154 @@
 import 'zone.js';
 import 'reflect-metadata';
-import { Component, NgModule } from '@angular/core';
+import { Component, enableProdMode, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { ViserModule } from 'viser-ng';
 import * as $ from 'jquery';
 const DataSet = require('@antv/data-set');
+const { DataView } = DataSet;
 
-const series = {
-  0: 'All Industries',
-  32229: 'Nonagriculture, Private Wage and Salary Workers',
-  32230: 'Mining and Extraction',
-  32231: 'Construction',
-  32232: 'Manufacturing',
-  32233: 'Durable goods manufacturing',
-  32234: 'Nondurable goods manufacturing',
-  32235: 'Wholesale and Retail Trade',
-  32236: 'Transportation and Utilities',
-  32237: 'Information',
-  32238: 'Finance',
-  32239: 'Business services',
-  32240: 'Education and Health',
-  32241: 'Leisure and hospitality',
-  32242: 'Other',
-  35109: 'Agriculture',
-  28615: 'Government',
-  35181: 'Self-employed',
+const scale = [{
+  dataKey: 'time',
+  type: 'time',
+  tickCount: 10,
+  mask: 'M/DD H:mm'
+}];
+
+const facetOpts = {
+  views: (view, facet) => {
+    const { colValue, data } = facet;
+    let color;
+    let alias;
+    if (colValue === 'rain') {
+      color = '#1890ff';
+      alias = '降雨量(mm)';
+
+    } else if (colValue === 'flow') {
+      color = '#2FC25B';
+      alias = '流量(m^3/s)';
+    }
+
+    return {
+      data,
+      scale: [{
+        dataKey: colValue,
+        alias,
+      }],
+      series: [{
+        quickType: 'line',
+        position: `time*${colValue}`,
+        color,
+      }]
+    };
+  }
 };
 
 @Component({
   selector: '#mount',
   template: `
-    <div>
-        <v-chart [forceFit]="forceFit" [height]="height" [padding]="20" [scale]="scale" [data]="data">
-            <v-area position="date*rate" color="series" [opacity]="0.85"></v-area>
-        </v-chart>
-    </div>
-    `,
+  <div *ngIf="data.length">
+    <v-chart [forceFit]="forceFit" [height]="400" [animate]="false" [padding]="[ 20, 20, 0, 80]"
+      [data]="chartDv" [scale]="scale">
+      <v-axis></v-axis>
+      <v-facet type="mirror" [fields]="['type']" [showTitle]="false" [padding]="[ 0, 0, 40, 0]" [views]="facetOpts.views"></v-facet>
+    </v-chart>
+    <v-plugin>
+      <v-slider width="auto" [height]="26"
+        [start]="start" [end]="end" [data]="originDv"
+        [xAxis]="'time'" [yAxis]="'value'" [scales]="scales"
+        [backgroundChart]="{
+          type: 'line'
+        }"
+        [onChange]="this.slideChange"
+      ></v-slider>
+    </v-plugin>
+  </div>
+  `
 })
 class AppComponent {
   forceFit: boolean = true;
-  height: number = 400;
+  height: number = 600;
   data = [];
-  scale = [
-    {
-      dataKey: 'date',
+  scale = scale;
+  originDv = [];
+  chartDv = [];
+  start =  '2009/7/20 0:00';
+  end = '2009/7/25 0:00';
+  facetOpts = facetOpts;
+  scales = {
+    time: {
       type: 'time',
-    },
-    {
-      dataKey: 'rate',
-      min: 0,
-    },
-  ];
-  series = series;
+      tickCount: 10,
+      mask: 'M/DD H:mm'
+    }
+  };
   constructor() {
-    $.getJSON('/assets/data/unemployment.json', sourceData => {
-      const dv = new DataSet.View().source(sourceData);
-      dv.transform({
-        type: 'map',
-        callback: function callback(row) {
-          row.series = series[row.series];
-          return row;
-        },
-      });
-      this.data = dv;
+    $.getJSON('/assets/data/rain-flow.json', (sourceData) => {
+      this.data = sourceData;
+      const data = this.getData();
+      this.originDv = data.originDv;
+      this.chartDv = data.chartDv;
     });
+  }
+
+  getData = () => {
+    const { start, end, data } = this;
+    const startTime = new Date(start).getTime();
+    const endTime = new Date(end).getTime();
+    const ds = new DataSet({
+      state: {
+        start,
+        end,
+      }
+    });
+    const originDv = ds.createView();
+    originDv.source(data)
+      .transform({
+        type: 'fold',
+        fields: [ 'rain', 'flow' ],
+        key: 'type',
+        value: 'value',
+        retains: [ 'rain', 'flow', 'time' ]
+      });
+
+    const chartDv = ds.createView();
+    chartDv.source(originDv)
+      .transform({
+        type: 'fold',
+        fields: [ 'rain', 'flow' ],
+        key: 'type',
+        value: 'value',
+        retains: [ 'rain', 'flow', 'time' ]
+      })
+      .transform({
+        type: 'filter',
+        callback(obj) {
+          const time = new Date(obj.time).getTime(); // !注意：时间格式，建议转换为时间戳进行比较
+          return time >= startTime && time <= endTime;
+        }
+      });
+    return { originDv, chartDv };
+  }
+  slideChange = (opts: any) => {
+    this.start = opts.startValue;
+    this.end = opts.endValue;
+    const data = this.getData();
+    this.originDv = data.originDv;
+    this.chartDv = data.chartDv;
   }
 }
 
 @NgModule({
-  declarations: [AppComponent],
-  imports: [BrowserModule, ViserModule],
+  declarations: [
+    AppComponent
+  ],
+  imports: [
+    BrowserModule,
+    ViserModule
+  ],
   providers: [],
-  bootstrap: [AppComponent],
+  bootstrap: [
+    AppComponent
+  ]
 })
-export default class AppModule {}
+export default class AppModule { }

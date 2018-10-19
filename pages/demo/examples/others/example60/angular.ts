@@ -1,113 +1,99 @@
 import 'zone.js';
 import 'reflect-metadata';
-import * as $ from 'jquery';
-import { Component, NgModule } from '@angular/core';
+import { Component, enableProdMode, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { ViserModule } from 'viser-ng';
-const DataSet=require('@antv/data-set');
+import { ViserModule, registerShape } from 'viser-ng';
+import * as $ from 'jquery';
+const DataSet = require('@antv/data-set');
+
+registerShape('point', 'cloud', {
+  draw(cfg, container) {
+    return container.addShape('text', {
+      attrs: {
+        fillOpacity: cfg.opacity,
+        fontSize: cfg.origin._origin.size,
+        rotate: cfg.origin._origin.rotate,
+        text: cfg.origin._origin.text,
+        textAlign: 'center',
+        fontFamily: cfg.origin._origin.font,
+        fill: cfg.color,
+        textBaseline: 'Alphabetic',
+        ...cfg.style,
+        x: cfg.x,
+        y: cfg.y,
+      },
+    });
+  }
+});
+
+const scale = [
+  { dataKey: 'x', nice: false },
+  { dataKey: 'y', nice: false },
+];
+
+const padding = [0];
+
 @Component({
   selector: '#mount',
   template: `
-<div *ngIf="data.length">
-  <div id="canvas1">
-    <v-chart
-      [forceFit]="true"
-      height="400"
-      [animate]="false"
-      [padding]="[100,40,50,80]"
-      [data]="dv"
-      [scale]="scale1"
-    >
-      <v-axis></v-axis>
-      <v-area position="date*price" shape="smooth" opacity="0.85"></v-area>
+  <div >
+    <v-chart [width]="640" [height]="400" [data]="data" [scale]="scale" [padding]="padding">
+      <v-tooltip [showTitle]="false"></v-tooltip>
+      <v-coord type="rect" direction="TL"></v-coord>
+      <v-point position="x*y" [color]="'category'" shape="cloud" tooltip="value*category"></v-point>
     </v-chart>
   </div>
-  <div id="canvas2">
-    <v-chart
-      [forceFit]="true"
-      height="100"
-      [padding]="[5.40,60,80]"
-      [data]="data"
-      [scale]="scale2"
-    >
-      <v-axis dataKey="date"></v-axis>
-      <v-axis dataKey="price" [show]="false"></v-axis>
-      <v-area position="date*price" [active]="false" shape="smooth" opacity="0.85"></v-area>
-      <v-brush type="x" [dragable]="true" [onBrushmove]="this.handleMove" [onDragmove]="this.handleMove"></v-brush>
-    </v-chart>
-  </div>
-</div>
-  `,
+  `
 })
 class AppComponent {
-  data:any=[];
-  date:any=[];
-  ds:any={};
-  scale1:any=[];
-  scale2:any=[];
-  dv:any={};
-  constructor(){
-    $.getJSON('/assets/data/sp500.json',data=>{
-      const ds = new DataSet({
-        state: {
-          dates: null
+  scale = scale;
+  data = [];
+
+  constructor() {
+    $.getJSON('/assets/data/world-population.json', (data) => {
+      const dv = new DataSet.View().source(data);
+      const range = dv.range('value');
+      const min = range[0];
+      const max = range[1];
+      dv.transform({
+        type: 'tag-cloud',
+        fields: ['x', 'value'],
+        size: [640, 400],
+        font: 'Verdana',
+        padding: 0,
+        timeInterval: 5000, // max execute time
+        rotate() {
+          let random = ~~(Math.random() * 4) % 4;
+          if (random == 2) {
+            random = 0;
+          }
+          return random * 90; // 0, 90, 270
+        },
+        fontSize(d) {
+          if (d.value) {
+            return ((d.value - min) / (max - min)) * (80 - 24) + 24;
+          }
+          return 0;
         }
       });
-      const totalDv = ds.createView().source(data);
-      const scale1=[
-        {
-          dataKey:'date',
-          tickCount: 10,
-          type: 'time',
-          mask: 'MMM D YYYY'
-        },
-        {
-          dataKey:'price',
-          min: totalDv.min('price'),
-          max: totalDv.max('price')
-        }
-      ];
-      const scale2=[
-        {
-          dataKey:'date',
-          tickCount: 10,
-          type: 'time',
-          mask: 'YYYY'
-        }
-      ];
-      this.data=data;
-      this.ds=ds;
-      this.scale1=scale1;
-      this.scale2=scale2;
-      this.getDv();
+
+      this.data = dv.rows;
     });
-  }
-  getDv=()=>{
-    const {ds,data,date}=this;
-    const dv = ds.createView();
-    dv.source(data).transform({
-      type: 'filter',
-      callback: function callback(obj) {
-        // console.log(obj);
-        if (date.length!==0) {
-          return date.indexOf(obj.date) > -1;
-        }
-        return obj;
-      }
-    });
-    this.dv=dv;
-  }
-  handleMove=(e)=>{
-    const date=e.date;
-    this.date=date;
-    this.getDv();
   }
 }
 
 @NgModule({
-  declarations: [AppComponent],
-  imports: [BrowserModule, ViserModule],
+  declarations: [
+    AppComponent
+  ],
+  imports: [
+    BrowserModule,
+    ViserModule
+  ],
   providers: [],
-  bootstrap: [AppComponent],
+  bootstrap: [
+    AppComponent
+  ]
 })
-export default class AppModule {}
+export default class AppModule { }
+

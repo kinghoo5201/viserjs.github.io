@@ -1,50 +1,84 @@
 <template>
   <div>
-    <v-chart :force-fit="true" :height="height" padding="40" :data="data">
-      <v-tooltip show-title="null" />
-      <v-coord type="polar" :inner-radius="0.2" />
-      <v-axis dataKey="week" :grid="null" :line="null" :tick-line="null" :label="null" />
-      <v-axis dataKey="time" :grid="null" :line="null" :tick-line="null" :label="{ offset: 3 }" />
-      <v-polygon
-        position="time*week"
-        :color="['value', '#BAE7FF-#1890FF-#0050B3']"
-        tooltip="week*time*value"
-        :v-style="{
-          stroke: '#fff',
-          lineWidth: 1,
-        }" />
-      <v-guide v-for="(val, idx) in values"
-        :key="val"
-        type="text"
-        :top="true"
-        :position="[0, idx]"
-        :content="val"
-        :v-style="{
-          fill: '#fff',
-          textAlign: 'center',
-          shadowBlur: 2,
-          shadowColor: 'rgba(0, 0, 0, .45)'
-        }" />
+    <v-chart :width="640" :height="400" :padding="[0]" :data="data" :scale="scale">
+      <v-tooltip :show-title="false" />
+      <v-coord type="rect" direction="TL" />
+      <v-point position="x*y" color="text" shape="cloud" tooltip="value*category" />
     </v-chart>
   </div>
 </template>
 
 <script>
+import { registerShape } from 'viser-vue';
 import * as $ from 'jquery';
+const DataSet = require('@antv/data-set');
 
-const values = ['Mon.', 'Tue.', 'Wed.', 'Thu.', 'Fri.', 'Sat.', 'Sun.'];
+const scale = [
+  { dataKey: 'x', nice: false },
+  { dataKey: 'y', nice: false },
+];
+
+registerShape('point', 'cloud', {
+  draw(cfg, container) {
+    return container.addShape('text', {
+      attrs: {
+        fillOpacity: cfg.opacity,
+        fontSize: cfg.origin._origin.size,
+        rotate: cfg.origin._origin.rotate,
+        text: cfg.origin._origin.text,
+        textAlign: 'center',
+        fontFamily: cfg.origin._origin.font,
+        fill: cfg.color,
+        textBaseline: 'Alphabetic',
+        ...cfg.style,
+        x: cfg.x,
+        y: cfg.y,
+      },
+    });
+  }
+});
 
 export default {
   mounted() {
-    $.getJSON('/assets/data/polar-heatmap.json', (data) => {
-      this.$data.data = data;
+    $.getJSON('/assets/data/antv-keywords.json', (data) => {
+      const dv = new DataSet.View().source(data);
+      const range = dv.range('value');
+      const min = range[0];
+      const max = range[1];
+      const imageMask = new Image();
+      imageMask.crossOrigin = '';
+      imageMask.src = '/assets/image/logo-mask-16x9.png';
+      imageMask.onload = () => {
+        dv.transform({
+          type: 'tag-cloud',
+          fields: ['name', 'value'],
+          size: [640, 400],
+          imageMask,
+          font: 'Verdana',
+          padding: 0,
+          timeInterval: 5000, // max execute time
+          rotate() {
+            let random = ~~(Math.random() * 4) % 4;
+            if (random == 2) {
+              random = 0;
+            }
+            return random * 90; // 0, 90, 270
+          },
+          fontSize(d) {
+            if (d.value) {
+              return ((d.value - min) / (max - min)) * (32 - 8) + 8;
+            }
+            return 0;
+          }
+        });
+        this.$data.data = dv.rows;
+      }
     });
   },
   data() {
     return {
-      height: 400,
       data: [],
-      values: values,
+      scale,
     };
   }
 };
