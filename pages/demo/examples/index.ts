@@ -577,7 +577,7 @@ const examples = {
           path: 'example3',
           enName: 'area-null',
           cnName: '区域图（存在空值）',
-        }
+        },
         {
           path: 'example5',
           enName: 'area-range-line',
