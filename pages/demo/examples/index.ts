@@ -565,8 +565,8 @@ const examples = {
       examples: [
         {
           path: 'example1',
-          enName: 'area-horizon-graph',
-          cnName: '地平面图',
+          enName: 'line-horizon-graph',
+          cnName: '地平线图',
         },
         {
           path: 'example2',
