@@ -4,20 +4,25 @@ import { Component, enableProdMode, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { ViserGraphModule } from 'viser-graph-ng';
 const data = {
-  nodes: [{
-    id: 'node1',
-    x: 100,
-    y: 200
-  },{
-    id: 'node2',
-    x: 300,
-    y: 200
-  }],
-  edges: [{
-    id: 'edge1',
-    target: 'node2',
-    source: 'node1'
-  }]
+  nodes: [
+    {
+      id: 'node1',
+      x: 100,
+      y: 200,
+    },
+    {
+      id: 'node2',
+      x: 300,
+      y: 200,
+    },
+  ],
+  edges: [
+    {
+      id: 'edge1',
+      target: 'node2',
+      source: 'node1',
+    },
+  ],
 };
 
 const graph = {
@@ -30,13 +35,12 @@ const graph = {
   data,
   onClick: function(ev, graph) {
     console.log('click', ev, graph);
-  }
+  },
 };
 const zoom = {
   min: 1,
   max: 10,
 };
-
 
 @Component({
   selector: '#mount',
@@ -49,9 +53,8 @@ const zoom = {
       <v-zoom [max]="zoom.max" [min]="zoom.min"></v-zoom>
     </v-graph>
   </div>
-  `
+  `,
 })
-
 class AppComponent {
   data = data;
   graph = graph;
@@ -59,16 +62,9 @@ class AppComponent {
 }
 
 @NgModule({
-  declarations: [
-    AppComponent
-  ],
-  imports: [
-    BrowserModule,
-    ViserGraphModule
-  ],
+  declarations: [AppComponent],
+  imports: [BrowserModule as any, ViserGraphModule],
   providers: [],
-  bootstrap: [
-    AppComponent
-  ]
+  bootstrap: [AppComponent],
 })
 export default class AppModule {}

@@ -4,20 +4,25 @@ import { Component, enableProdMode, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { ViserGraphModule } from 'viser-graph-ng';
 const data = {
-  roots: [{
-    label: 'root',
-    id:1,
-    children: [{
-      label: 'child1',
+  roots: [
+    {
+      label: 'root',
+      id: 1,
       children: [
         {
-          label: 'child\n1.1'
-        }
-      ]
-    }, {
-      label: 'child2'
-    }]
-  }]
+          label: 'child1',
+          children: [
+            {
+              label: 'child\n1.1',
+            },
+          ],
+        },
+        {
+          label: 'child2',
+        },
+      ],
+    },
+  ],
 };
 
 const graph = {
@@ -30,7 +35,7 @@ const graph = {
   data,
   onClick: function(ev, graph) {
     console.log('click', ev, graph);
-  }
+  },
 };
 const zoom = {
   min: 1,
@@ -48,9 +53,8 @@ const zoom = {
       <v-zoom [max]="zoom.max" [min]="zoom.min"></v-zoom>
     </v-graph>
   </div>
-  `
+  `,
 })
-
 class AppComponent {
   data = data;
   graph = graph;
@@ -58,16 +62,9 @@ class AppComponent {
 }
 
 @NgModule({
-  declarations: [
-    AppComponent
-  ],
-  imports: [
-    BrowserModule,
-    ViserGraphModule
-  ],
+  declarations: [AppComponent],
+  imports: [BrowserModule as any, ViserGraphModule],
   providers: [],
-  bootstrap: [
-    AppComponent
-  ]
+  bootstrap: [AppComponent],
 })
 export default class AppModule {}

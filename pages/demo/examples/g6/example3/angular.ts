@@ -2,19 +2,28 @@ import 'zone.js';
 import 'reflect-metadata';
 import { Component, enableProdMode, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { ViserGraphModule, registerNode, registerEdge, Layouts } from 'viser-graph-ng';
-import {data} from './data'
+import {
+  ViserGraphModule,
+  registerNode,
+  registerEdge,
+  Layouts,
+} from 'viser-graph-ng';
+import { data } from './data';
 
 registerNode('treeNode', {
-  anchor: [[0, 0.5], [0.5, 1]]
+  anchor: [[0, 0.5], [0.5, 1]],
 });
 registerEdge('VH', {
   getPath: function getPath(item) {
     var points = item.getPoints();
     var start = points[0];
     var end = points[points.length - 1];
-    return [['M', start.x, start.y], ['L', start.x, end.y], ['L', end.x, end.y]];
-  }
+    return [
+      ['M', start.x, start.y],
+      ['L', start.x, end.y],
+      ['L', end.x, end.y],
+    ];
+  },
 });
 
 var layout = new Layouts.IndentedTree({
@@ -23,7 +32,7 @@ var layout = new Layouts.IndentedTree({
   getVGap: function getVGap() /* d */ {
     // 竖向间距
     return 4;
-  }
+  },
 });
 
 const graph = {
@@ -36,7 +45,7 @@ const graph = {
   type: 'tree',
   layout: layout,
   data: {
-    roots: [data]
+    roots: [data],
   },
   onAfterchange: function(ev, graph) {
     graph.getNodes().forEach(function(node) {
@@ -52,7 +61,7 @@ const graph = {
       label.translate(dx, dy);
     });
     graph.draw();
-  }
+  },
 };
 
 const node = {
@@ -63,7 +72,7 @@ const node = {
   },
 };
 const edge = {
-  shape: 'VH'
+  shape: 'VH',
 };
 
 @Component({
@@ -79,9 +88,8 @@ const edge = {
       <v-edge [shape]="edge.shape"></v-edge>
     </v-graph>
   </div>
-  `
+  `,
 })
-
 class AppComponent {
   graph = graph;
   node = node;
@@ -89,16 +97,9 @@ class AppComponent {
 }
 
 @NgModule({
-  declarations: [
-    AppComponent
-  ],
-  imports: [
-    BrowserModule,
-    ViserGraphModule
-  ],
+  declarations: [AppComponent],
+  imports: [BrowserModule as any, ViserGraphModule],
   providers: [],
-  bootstrap: [
-    AppComponent
-  ]
+  bootstrap: [AppComponent],
 })
 export default class AppModule {}

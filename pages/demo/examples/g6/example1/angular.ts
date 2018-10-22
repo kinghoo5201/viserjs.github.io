@@ -2,11 +2,16 @@ import 'zone.js';
 import 'reflect-metadata';
 import { Component, enableProdMode, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { ViserGraphModule, registerNode, registerEdge, Layouts } from 'viser-graph-ng';
-import {data} from './data'
+import {
+  ViserGraphModule,
+  registerNode,
+  registerEdge,
+  Layouts,
+} from 'viser-graph-ng';
+import { data } from './data';
 
 registerNode('treeNode', {
-  anchor: [[0, 0.5], [1, 0.5]]
+  anchor: [[0, 0.5], [1, 0.5]],
 });
 
 registerEdge('smooth', {
@@ -16,10 +21,24 @@ registerEdge('smooth', {
     var end = points[points.length - 1];
     var hgap = Math.abs(end.x - start.x);
     if (end.x > start.x) {
-      return [['M', start.x, start.y], ['C', start.x + hgap / 4, start.y, end.x - hgap / 2, end.y, end.x, end.y]];
+      return [
+        ['M', start.x, start.y],
+        [
+          'C',
+          start.x + hgap / 4,
+          start.y,
+          end.x - hgap / 2,
+          end.y,
+          end.x,
+          end.y,
+        ],
+      ];
     }
-    return [['M', start.x, start.y], ['C', start.x - hgap / 4, start.y, end.x + hgap / 2, end.y, end.x, end.y]];
-  }
+    return [
+      ['M', start.x, start.y],
+      ['C', start.x - hgap / 4, start.y, end.x + hgap / 2, end.y, end.x, end.y],
+    ];
+  },
 });
 
 var layout = new Layouts.CompactBoxTree({
@@ -31,7 +50,7 @@ var layout = new Layouts.CompactBoxTree({
   getVGap: function getVGap() /* d */ {
     // 竖向间距
     return 10;
-  }
+  },
 });
 
 const graph = {
@@ -44,10 +63,10 @@ const graph = {
   type: 'tree',
   layout: layout,
   data: {
-    roots: [data]
+    roots: [data],
   },
   onAfterchange: function(ev, graph) {
-    console.log('onAfterchange')
+    console.log('onAfterchange');
     graph.getNodes().forEach(function(node) {
       var model = node.getModel();
       var label = node.getLabel();
@@ -64,7 +83,7 @@ const graph = {
       label.translate(dx, dy);
     });
     graph.draw();
-  }
+  },
 };
 
 const node = {
@@ -75,7 +94,7 @@ const node = {
   },
 };
 const edge = {
-  shape: 'smooth'
+  shape: 'smooth',
 };
 
 @Component({
@@ -91,9 +110,8 @@ const edge = {
       <v-edge [shape]="edge.shape"></v-edge>
     </v-graph>
   </div>
-  `
+  `,
 })
-
 class AppComponent {
   graph = graph;
   node = node;
@@ -101,16 +119,9 @@ class AppComponent {
 }
 
 @NgModule({
-  declarations: [
-    AppComponent
-  ],
-  imports: [
-    BrowserModule,
-    ViserGraphModule
-  ],
+  declarations: [AppComponent],
+  imports: [BrowserModule as any, ViserGraphModule],
   providers: [],
-  bootstrap: [
-    AppComponent
-  ]
+  bootstrap: [AppComponent],
 })
 export default class AppModule {}

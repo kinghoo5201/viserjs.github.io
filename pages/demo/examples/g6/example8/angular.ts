@@ -2,7 +2,13 @@ import 'zone.js';
 import 'reflect-metadata';
 import { Component, enableProdMode, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { ViserGraphModule, registerNode, registerEdge, Layouts, Util } from 'viser-graph-ng';
+import {
+  ViserGraphModule,
+  registerNode,
+  registerEdge,
+  Layouts,
+  Util,
+} from 'viser-graph-ng';
 
 var getTreeData = function getTreeData(x1, y1, angle, depth, nodes, edges) {
   var nodes = nodes && arguments[4] !== undefined ? arguments[4] : [];
@@ -17,23 +23,23 @@ var getTreeData = function getTreeData(x1, y1, angle, depth, nodes, edges) {
     nodes.push({
       id: id1,
       x: x1,
-      y: y1
+      y: y1,
     });
     nodes.push({
       id: id2,
       x: x2,
-      y: y2
+      y: y2,
     });
     edges.push({
       source: id1,
-      target: id2
+      target: id2,
     });
     getTreeData(x2, y2, angle - 30, depth - 1, nodes, edges);
     getTreeData(x2, y2, angle + 30, depth - 1, nodes, edges);
   }
   return {
     nodes: nodes,
-    edges: edges
+    edges: edges,
   };
 };
 var data = getTreeData(0, 0, -90, 9, null, null);
@@ -50,7 +56,7 @@ const graph = {
 };
 
 const node = {
-  size: 2
+  size: 2,
 };
 
 @Component({
@@ -64,25 +70,16 @@ const node = {
       <v-node [size]="node.size" ></v-node>
     </v-graph>
   </div>
-  `
+  `,
 })
-
 class AppComponent {
   graph = graph;
   node = node;
 }
-
 @NgModule({
-  declarations: [
-    AppComponent
-  ],
-  imports: [
-    BrowserModule,
-    ViserGraphModule
-  ],
+  declarations: [AppComponent],
+  imports: [BrowserModule as any, ViserGraphModule],
   providers: [],
-  bootstrap: [
-    AppComponent
-  ]
+  bootstrap: [AppComponent],
 })
 export default class AppModule {}
