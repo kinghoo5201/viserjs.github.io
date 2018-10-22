@@ -392,7 +392,7 @@ const examples = {
       examples: [
         {
           path: 'example1',
-          enName: 'Bubble map',
+          enName: 'Bubble Map',
           cnName: '带气泡的地图',
         },
         {
