@@ -3,64 +3,88 @@ import 'reflect-metadata';
 import { Component, enableProdMode, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { ViserModule } from 'viser-ng';
-
-const data = [
-  { "term":"Zombieland","count":9 },
-  { "term":"Wieners","count":8 },
-  { "term":"Toy Story","count":8 },
-  { "term":"trashkannon","count":7 },
-  { "term":"the GROWLERS","count":6 },
-  { "term":"mudweiser","count":6 },
-  { "term":"ThunderCats","count":4 },
-  { "term":"The Taqwacores - Motion Picture","count":4 },
-  { "term":"The Shawshank Redemption","count":2 },
-  { "term":"The Olivia Experiment","count":1 },
-];
+import * as $ from 'jquery';
+const DataSet = require('@antv/data-set');
 
 const scale = [{
-  dataKey: 'count',
-  max: 2,
+  dataKey: 'exp_dat',
+  type: 'time',
+  mask: 'M/YY',
+  tickCount: 14
+}, {
+  dataKey: 'exp_amo',
+  type: 'log',
+  ticks: [225, 1000000 ,2000000 , 4000000, 6000000]
 }];
+
+const axis1Opts = {
+  dataKey: 'exp_dat',
+  tickLine: null,
+  label: {
+    textStyle: {
+      fontSize: 14
+    }
+  }
+};
+
+const axis2Opts = {
+  dataKey: 'exp_amo',
+  tickLine: null,
+  line: null,
+  grid: {
+    lineStyle: {
+      lineDash: null,
+      stroke: '#999'
+    }
+  },
+  label: {
+    formatter: function(val) {
+      let formatted;
+      if (+val === 225) {
+        formatted = 0;
+      } else {
+        formatted = val / 1000000;
+      }
+      return '$' + formatted + 'M';
+    }
+  }
+};
 
 @Component({
   selector: '#mount',
   template: `
   <div>
-    <v-chart [forceFit]="forceFit" [height]="height" [padding]="[20, 80]" [data]="data" [scale]="scale">
-      <v-tooltip></v-tooltip>
-      <v-coord type="theta" innerRadius="0.2" startAngle="-90" endAngle="180"></v-coord>
-      <v-bar position="term*count" color="#8543e0" shape="line" select="false" [style]="barStyle"></v-bar>
-      <v-point position="term*count" color="#8543e0" shape="circle"></v-point>
-      <v-guide *ngFor="let obj of data"
-        type="text"
-        [position]="this.getPosition(obj)" [content]="this.getContent(obj)"
-        [style]="{
-          textAlign: 'right'
-        }">
-      </v-guide>
-      <v-guide type="text" [position]="guideTextPosition" content="Music" [style]="guideTextStyle"></v-guide>
+    <v-chart [forceFit]="forceFit" [height]="height" [data]="data" [scale]="scale">
+      <v-tooltip [showTitle]="false"></v-tooltip>
+      <v-axis [dataKey]="axis1Opts.dataKey" [tickLine]="axis1Opts.tickLine" [label]="axis1Opts.label"></v-axis>
+      <v-axis [dataKey]="axis2Opts.dataKey" [tickLine]="axis2Opts.tickLine" [line]="axis2Opts.line" [grid]="axis2Opts.grid"
+        [grid]="axis2Opts.grid" [label]="axis2Opts.label"></v-axis>
+      <v-point position="exp_dat*exp_amo" [size]="['exp_amo', [ 1, 10 ]]" [size]="pointOpts.size" opacity="exp_amo" shape="circle" tooltip="exp_dat*can_nam*spe_nam*exp_amo"></v-point>
     </v-chart>
   </div>
   `
 })
+
 class AppComponent {
   forceFit: boolean = true;
   height: number = 400;
-  data = data;
+  data = [];
   scale = scale;
-  guideTextStyle = {
-    textAlign: 'center',
-    fontSize: 24,
-    fill: '#8543e0',
-  };
-  guideTextPosition = ['50%', '50%'];
-  barStyle = { lineAppendWidth: 10 };
+  axis1Opts = axis1Opts;
+  axis2Opts = axis2Opts;
 
-  getPosition = (obj) => {
-    return [obj.term, 0];
-  }
-  getContent = (obj) => {
-    return obj.term.toString();
+  constructor() {
+    $.getJSON('/assets/data/time-scatter.json', (sourceData) => {
+      const dv = new DataSet.View().source(sourceData);
+      dv.transform({
+        type: 'map',
+        callback: obj => {
+          obj.exp_amo = obj.exp_amo * 1;
+          return obj;
+        }
+      });
+      this.data = dv.rows;
+    });
   }
 }
 

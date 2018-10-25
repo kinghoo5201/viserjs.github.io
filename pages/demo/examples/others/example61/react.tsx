@@ -1,80 +1,57 @@
+import { Chart, Axis, Tooltip, Coord, JitterPoint } from 'viser-react';
 import * as React from 'react';
 import * as $ from 'jquery';
-import { Chart, Axis, Brush, View, Point } from 'viser-react';
+import * as _ from 'lodash';
 
-let tempChart;
-// 将chart实例存储在tempChart变量里
+const scale = [{
+  dataKey: 'type',
+  range: [0, 1]
+}];
+
+const axis1Opts = {
+  dataKey: 'clarity',
+  grid: {
+    align: 'center',
+    lineStyle: {
+      lineDash: [0, 0]
+    }
+  }
+};
+
+const jitterPointOpts = {
+  position: 'clarity*type',
+  color: 'clarity',
+  shape: 'circle',
+  opacity: 0.65,
+};
+
 export default class App extends React.Component {
   state = {
     data: [],
   };
+
   componentDidMount() {
-    $.getJSON('/assets/data/cars.json', data => {
-      this.setState({ data });
-    });
-  }
-  onBrushstart(ev) {
-    // 使用brush实例不可使用箭头函数硬性绑定App实例
-    const x = ev.x,
-      y = ev.y;
-    const chart = tempChart.chart.chartInstance;
-    const views = chart.getViewsByPoint({
-      x: x,
-      y: y,
-    });
-    if (views.length > 1) {
-      (this as any).chart = views[1];
-      const coord = views[1].get('coord');
-      (this as any).plot = {
-        start: coord.start,
-        end: coord.end,
-      };
-      (this as any).xScale = views[1].getXScale();
-      (this as any).yScale = views[1].getYScales()[0];
-    }
-  }
-  onBrushmove(ev) {
-    const data = ev.data,
-      viewInstance = tempChart.chart.viewInstance,
-      view2 = viewInstance[Object.keys(viewInstance)[1]];
-    view2.filterShape(function(obj) {
-      return data.indexOf(obj) > -1;
-    });
+    $.getJSON('/assets/data/diamond.json', (data) => {
+      data.forEach((obj: any) => {
+        obj.type = '1';
+      });
+      this.setState({data: data});
+    })
   }
   render() {
     const { data } = this.state;
+
     return (
       <div>
-        <Chart forceFit={true} height={500} ref={node => (tempChart = node)}>
-          <View
-            data={data}
-            end={{
-              x: 0.45,
-              y: 1,
-            }}
-          >
-            <Axis />
-            <Point position="Horsepower*Miles_per_Gallon" />
-          </View>
-          <View
-            data={data}
-            start={{
-              x: 0.55,
-              y: 0,
-            }}
-          >
-            <Axis />
-            <Point position="Acceleration*Displacement" />
-          </View>
-          <Brush
-            canvas={null}
-            dragable={true}
-            onBrushstart={this.onBrushstart}
-            onBrushmove={this.onBrushmove}
-            onDragmove={this.onBrushmove}
-          />
+        <Chart forceFit height={400} padding={[ 40, 100, 80, 80 ]} data={data} scale={scale}>
+          <Tooltip />
+          <Coord type="polar"/>
+          <Axis {...axis1Opts}/>
+          <JitterPoint {...jitterPointOpts}/>
         </Chart>
       </div>
     );
   }
 }
+
+

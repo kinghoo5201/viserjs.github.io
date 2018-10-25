@@ -1,69 +1,70 @@
-import { Global, Chart, Axis, Legend, Point, View, Line, Tooltip } from 'viser-react';
+import { Chart, Tooltip, Axis, Bar, SmoothLine, Point, Legend } from 'viser-react';
 import * as React from 'react';
-import * as $ from 'jquery';
-import * as _ from 'lodash';
-const DataSet = require('@antv/data-set');
 
-const REGRESSION_METHODS = [
-  'linear',
-  'exponential',
-  'logarithmic',
-  'power',
-  'polynomial'
+const data = [
+  { time: '10:10', call: 4, waiting: 2, people: 2 },
+  { time: '10:15', call: 2, waiting: 6, people: 3 },
+  { time: '10:20', call: 13, waiting: 2, people: 5 },
+  { time: '10:25', call: 9, waiting: 9, people: 1 },
+  { time: '10:30', call: 5, waiting: 2, people: 3 },
+  { time: '10:35', call: 8, waiting: 2, people: 1 },
+  { time: '10:40', call: 13, waiting: 1, people: 2 }
 ];
 
 const scale = [{
-  dataKey: 'carat',
-  sync: true,
+  dataKey: 'call',
+  min: 0
 }, {
-  dataKey: 'price',
-  sync: true,
+  dataKey: 'people',
+  min: 0
+}, {
+  dataKey: 'waiting',
+  min: 0
 }];
 
 export default class App extends React.Component {
-  state = {
-    data: [],
-  };
-
-  componentDidMount() {
-    $.getJSON('/assets/data/diamond.json', (data) => {
-      this.setState({data});
-    })
-  }
-
   render() {
-    const  { data } = this.state;
     return (
-      <div>
-        <Chart forceFit height={400} data={data} scale={scale}>
-          <Axis />
-          <Tooltip />
-          <View data={data} scale={scale}>
-            <Point position="carat*price"/>
-          </View>
-          {
-            REGRESSION_METHODS.map((method: any, i: number) => {
-              const dv = new DataSet.View().source(data)
-              .transform({
-                type: 'regression',
-                method,
-                fields: [ 'carat', 'price' ],
-                bandwidth: 0.1,
-                extent: [ 0, 4 ],
-                as: [ 'carat', 'price' ]
-              });
-              return (
-                <View data={dv} scale={scale} key={`view-${i}`}>
-                  <Axis dataKey='price' show={false}/>
-                  <Line position="carat*price" size={1} color={Global.colors_16[i]}/>
-                </View>
-              );
-            })
-          }
-        </Chart>
-      </div>
+      <Chart forceFit height={400} data={data} scale={scale}>
+        <Tooltip />
+        <Legend
+          custom
+          allowAllCanceled
+          items={[
+            {value: 'waiting', marker: {symbol: 'square', fill: '#3182bd', radius: 5} },
+            {value: 'people', marker: {symbol: 'hyphen', stroke: '#fdae6b', radius: 5, lineWidth: 3} }
+          ]}
+          onClick={(ev, chart) => {
+            const item = ev.item;
+            const value = item.value;
+            const checked = ev.checked;
+            const geoms = chart.getAllGeoms();
+            for (let i = 0; i < geoms.length; i++) {
+              const geom = geoms[i];
+              if (geom.getYScale().field === value) {
+                if (checked) {
+                  geom.show();
+                } else {
+                  geom.hide();
+                }
+              }
+            }
+          }}
+        />
+        <Axis
+          dataKey="people"
+          grid={null}
+          label={{
+            textStyle: {
+              fill: '#fdae6b'
+            }
+          }}
+        />
+        <Bar position="time*waiting" color="#3182bd" />
+        <SmoothLine position="time*people" color="#fdae6b" size={3} />
+        <Point shape="circle" position="time*people" color="#fdae6b" size={3} />
+      </Chart>
     );
   }
 }
-
 

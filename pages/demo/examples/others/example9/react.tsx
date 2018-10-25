@@ -1,124 +1,160 @@
-import { Chart, View, Tooltip, Coord, StackInterval, Guide } from 'viser-react';
 import * as React from 'react';
-import * as _ from 'lodash';
-const DataSet = require('@antv/data-set');
+import * as $ from 'jquery';
+import { Chart, Brush, Legend, Facet, Tooltip } from 'viser-react';
 
-const text = [ 'MIDNIGHT', '3 AM', '6 AM', '9 AM', 'NOON', '3 PM', '6 PM', '9 PM' ];
-const data = [];
-for (let i = 0; i < 24; i++) {
-  const item = {} as any;
-  item.type = i + '';
-  item.value = 10;
-  data.push(item);
+const style = window.document.createElement('style');
+style.innerHTML = `
+#toolbar button{
+  margin:0 5px;
+  padding:5px;
+  cursor:pointer;
 }
-
-const dv = new DataSet.View().source(data).transform({
-  type: 'percent',
-  field: 'value',
-  dimension: 'type',
-  as: 'percent'
-});
-
-const stackInterval1Opts = {
-  position: 'percent',
-  color: ['type', ['rgba(255, 255, 255, 0)']],
-  style: {
-    stroke: '#444',
-    lineWidth: 1
-  },
-  tooltip: false,
-  select: false,
-};
-
-const stackInterval2Opts = {
-  position: 'type*value',
-  size: ['type', function(val) {
-    if (val % 3 === 0) {
-      return 4;
-    } else {
-      return 0;
-    }
-  }],
-  color: '#444',
-  tooltip: false,
-  label: ['type', function(val) {
-    if (val % 3 === 0) {
-      return text[val / 3];
-    }
-    return '';
-  }, {
-    offset: 15,
-    textStyle: {
-      fontSize: 12,
-      fontWeight: 'bold',
-      fill: '#bfbfbf'
-    }
-  }]
-};
-
-const userData = [
-  { type: '睡眠', value: 70 },
-  { type: '淡茶 & 烟斗 & 冥想', value: 10 },
-  { type: '写作', value: 10 },
-  { type: '教课', value: 40 },
-  { type: '酒吧吃肉配白酒', value: 40 },
-  { type: '散步', value: 10 },
-  { type: '拜访马大大', value: 30 },
-  { type: '阅读', value: 30 },
-];
-
-const userDv = new DataSet.View().source(userData).transform({
-  type: 'percent',
-  field: 'value',
-  dimension: 'type',
-  as: 'percent'
-});
-
-const userScale = [{
-  dataKey: 'percent',
-  formatter: (val: any) => {
-    return (val * 100).toFixed(2) + '%';
-  }
-}];
-
-const stackInterval3Opts = {
-  position: 'percent',
-  color: 'type',
-  label: ['type', {
-    offset: 40,
-  }],
-  select: false,
-};
-
+`;
+window.document.getElementsByTagName('head')[0].appendChild(style);
+let chart, brush;
 export default class App extends React.Component {
+  state = {
+    data: [],
+    showTooltip: true,
+    type: 'XY',
+  };
+  componentDidMount() {
+    $.getJSON('/assets/data/iris.json', data => {
+      this.setState({ data });
+    });
+  }
+  eachView = (view, facet) => {
+    view.axis(facet.colField, {
+      label: null,
+      line: {
+        lineWidth: 1,
+        stroke: '#000',
+      },
+      tickLine: {
+        lineWidth: 1,
+        stroke: '#000',
+        length: 4,
+      },
+    });
+    view.axis(facet.rowField, {
+      label: null,
+      line: {
+        lineWidth: 1,
+        stroke: '#000',
+      },
+      tickLine: {
+        lineWidth: 1,
+        stroke: '#000',
+        length: 4,
+      },
+    });
+    if (facet.rowIndex === facet.colIndex) {
+      view
+        .point()
+        .position(facet.colField + '*' + facet.colField)
+        .color('Species', ['#880000', '#008800', '#000088'])
+        .opacity(0.5)
+        .shape('circle')
+        .size(3)
+        .active(false);
+    } else {
+      view
+        .point()
+        .position([facet.colField, facet.rowField])
+        .color('Species', ['#880000', '#008800', '#000088'])
+        .opacity(0.5)
+        .shape('circle')
+        .size(3)
+        .active(false);
+    }
+    if ([0, 1, 2, 3].indexOf(facet.rowIndex) > -1 && facet.colIndex === 0) {
+      view.guide().text({
+        position: [3.7, 'median'],
+        content: facet.rowValue,
+        style: {
+          rotate: -90,
+          fontSize: 12,
+          fill: '#999',
+          textAlign: 'center',
+        },
+      });
+    }
+    if ([0, 1, 2, 3].indexOf(facet.colIndex) > -1 && facet.rowIndex === 3) {
+      view.guide().text({
+        position: ['median', 'min'],
+        content: facet.colValue,
+        style: {
+          fontSize: 12,
+          fill: '#999',
+          textAlign: 'center',
+        },
+        offsetY: 20,
+      });
+    }
+  };
+  onBrushstart = ev => {};
+  setBrushType(e) {
+    console.log('brush', brush);
+    console.log('chart', chart);
+    // const type=e.target.id;
+    // console.log(type);
+    // if (type === 'clear') {
+    //   brush.container.clear();
+    //   // brush.canvas.draw();
+    // } else {
+    //   this.setState({type});
+    // }
+  }
   render() {
+    const { data, showTooltip } = this.state;
+    const scale = [
+      {
+        dataKey: 'Species',
+        sync: true,
+      },
+    ];
     return (
       <div>
-        <Chart forceFit height={400} padding={80}>
-          <Tooltip showTitle={false} />
-          <View data={dv}>
-            <Coord type="theta" innerRadius={0.9} />
-            <StackInterval {...stackInterval1Opts} />
-            <Guide type="text" position={[ '50%', '50%' ]} content="24 hours"
-              style={{
-                lineHeight: 240,
-                fontSize: '30',
-                fill: '#262626',
-                textAlign: 'center'}}
-            />
-          </View>
-          <View data={dv}>
-            <Coord type="polar" innerRadius={0.9} />
-            <StackInterval {...stackInterval2Opts} />
-          </View>
-          <View data={userDv} scale={userScale}>
-            <Coord type="theta" innerRadius={0.75} />
-            <StackInterval {...stackInterval3Opts} />
-          </View>
+        <div id="toolbar" style={{ textAlign: 'center' }}>
+          <button id="XY" onClick={this.setBrushType}>
+            矩形选择
+          </button>
+          <button id="X" onClick={this.setBrushType}>
+            横向选择
+          </button>
+          <button id="Y" onClick={this.setBrushType}>
+            纵向选择
+          </button>
+          <button id="POLYGON" onClick={this.setBrushType}>
+            圈选
+          </button>
+          <button id="clear" onClick={this.setBrushType}>
+            清除选择
+          </button>
+        </div>
+        <Chart
+          ref={node => (chart = node)}
+          forceFit={true}
+          height={600}
+          data={data}
+          scale={scale}
+        >
+          <Legend hoverable={false} />
+          {showTooltip && <Tooltip />}
+          <Facet
+            type="matrix"
+            fields={['SepalLength', 'SepalWidth', 'PetalLength', 'PetalWidth']}
+            eachView={this.eachView}
+          />
+          <Brush
+            canvas={null}
+            ref={node => (brush = node)}
+            dragable={true}
+            type={this.state.type}
+            onBrushstart={this.onBrushstart}
+          />
         </Chart>
       </div>
     );
   }
 }
-
-

@@ -1,136 +1,61 @@
 import * as React from 'react';
-import * as $ from 'jquery';
-import { Area, Axis, Chart, Slider, Plugin, Legend, Tooltip } from 'viser-react';
-const DataSet = require('@antv/data-set');
+import { Chart, registerShape, Coord, Tooltip, Legend, Pie } from 'viser-react';
 
-const getJSON = src => new Promise(resolve => $.getJSON(src, data => resolve(data)));
+const data = [
+  {
+    type: '分类一',
+    value: 20,
+  },
+  {
+    type: '分类二',
+    value: 18,
+  },
+  {
+    type: '分类三',
+    value: 32,
+  },
+  {
+    type: '分类四',
+    value: 15,
+  },
+  {
+    type: 'Other',
+    value: 15,
+  },
+];
+
+// 可以通过调整这个数值控制分割空白处的间距，0-1 之间的数值
+const sliceNumber = 0.01;
+
+// 自定义 other 的图形，增加两条线
+registerShape('interval', 'sliceShape', {
+  draw: function draw(cfg, container) {
+    const points = cfg.points;
+    let path = [];
+    path.push(['M', points[0].x, points[0].y]);
+    path.push(['L', points[1].x, points[1].y - sliceNumber]);
+    path.push(['L', points[2].x, points[2].y - sliceNumber]);
+    path.push(['L', points[3].x, points[3].y]);
+    path.push('Z');
+    path = this.parsePath(path);
+    return container.addShape('path', {
+      attrs: {
+        fill: cfg.color,
+        path: path,
+      },
+    });
+  },
+});
 
 export default class App extends React.Component {
-  state = {
-    data: [],
-    start: '2009/7/20 0:00',
-    end: '2009/9/9 0:00'
-  }
-  onChange = (_ref) => {
-    var startValue = _ref.startValue,
-      endValue = _ref.endValue;
-    this.setState({
-      start: startValue,
-      end: endValue
-    });
-  }
-  getData = () => {
-    const { data, start, end } = this.state;
-    const ds = new DataSet({
-      state: {
-        start: new Date(start).getTime(),
-        end: new Date(end).getTime()
-      }
-    });
-    const dv = ds.createView('origin').source(data);
-    dv.transform({
-      type: 'filter',
-      callback: function callback(obj) {
-        const time = new Date(obj.time).getTime(); // !注意：时间格式，建议转换为时间戳进行比较
-        return time >= ds.state.start && time <= ds.state.end;
-      }
-    });
-    return { dv, ds };
-  }
-  async componentDidMount() {
-    const data = await getJSON('/assets/data/rain-flow.json');
-    await this.setState({
-      data,
-    });
-    const { dv, ds } = this.getData();
-    this.setState({
-      start: ds.state.start,
-      end: ds.state.end
-    })
-  }
   render() {
-    const { data, start, end } = this.state;
-    const { dv } = this.getData();
-    const scale = [
-      {
-        dataKey: 'time',
-        type: 'time',
-        tickCount: 8,
-        mask: 'm/dd hh:MM'
-      },
-      {
-        dataKey: 'flow',
-        alias: '流量(m^3/s)'
-      },
-      {
-        dataKey: 'rain',
-        alias: '降雨量(mm)'
-      }
-    ];
-    if (data.length === 0) {
-      return null;
-    }
     return (
-      <div>
-        <Chart
-          forceFit={true}
-          height={400}
-          padding={[40, 40, 40, 80]}
-          animate={false}
-          data={dv}
-          scale={scale}
-        >
-          <Tooltip />
-          <Axis dataKey="rain" grid={null} />
-          <Axis dataKey="flow" title={{ text: 'flow' }} />
-          <Legend
-            custom={true}
-            position="top"
-            items={[
-              {
-                value: 'flow',
-                marker: {
-                  symbol: 'circle',
-                  fill: 'l(100) 0:#a50f15 1:#fee5d9',
-                  radius: 5
-                }
-              },
-              {
-                value: 'rain',
-                marker: {
-                  symbol: 'circle',
-                  fill: 'l(100) 0:#293c55 1:#f7f7f7',
-                  radius: 5
-                }
-              }
-            ]}
-          />
-          <Area position="time*flow" color='l(100) 0:#a50f15 1:#fee5d9' opacity={.85} />
-          <Area position="time*rain" color='l(100) 0:#293c55 1:#f7f7f7' opacity={.85} />
-        </Chart>
-        <Plugin>
-          <Slider
-            width="auto"
-            height={26}
-            start={start}
-            end={end}
-            xAxis='time'
-            yAxis='flow'
-            scales={{
-              time: {
-                type: 'time',
-                tickCount: 10,
-                mask: 'M/DD H:mm'
-              }
-            }}
-            data={data}
-            backgroundChart={{
-              type: 'line'
-            }}
-            onChange={this.onChange.bind(this)}
-          />
-        </Plugin>
-      </div>
-    )
+      <Chart forceFit={true} height={400} data={data}>
+        <Coord type="theta" innerRadius={0.75} />
+        <Tooltip showTitle={false} />
+        <Legend dataKey="type" />
+        <Pie position="value" color="type" shape="sliceShape" />
+      </Chart>
+    );
   }
-} 
+}

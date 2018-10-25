@@ -1,60 +1,91 @@
 <template>
   <div>
-    <v-chart :force-fit="true" :height="height" :padding="80" :data="dv">
-      <v-coord type="polar" :innerRadius="0.1" />
-      <v-axis dataKey="percent" :title="{offset: 40, text: '百分比'}" />
-      <v-legend dataKey="难民类型" position="bottom" />
-      <v-stack-interval :position="stackInterval1Opts.position" :color="stackInterval1Opts.color"
-        :v-style="stackInterval1Opts.style" />
+    <v-chart :forceFit="true" :height="height" :data="source" :scale="scale" :padding="padding">
+      <v-tooltip />
+      <v-axis
+        dataKey="name"
+        :grid="gridy"
+        :tickLine="null"
+      >
+      </v-axis>
+      <v-axis
+        dataKey="day"
+        :grid="gridx"
+      >
+      </v-axis>
+      <v-polygon 
+        position="name*day" 
+        :color="color"
+        :style="style"
+      />
+      <v-brush
+        type=""  
+        :style="brushStyle"
+      >
+      </v-brush>
     </v-chart>
   </div>
 </template>
 
 <script>
-const DataSet = require('@antv/data-set');
-
-const data = [
-  {year: '2000','类型 A':21.0 ,'类型 B':16 ,'类型 C': 8},
-  {year: '2001','类型 A':25.0 ,'类型 B':16 ,'类型 C': 8},
-  {year: '2002','类型 A':25.0 ,'类型 B':15 ,'类型 C': 8},
-  {year: '2003','类型 A':25.0 ,'类型 B':14 ,'类型 C': 7},
-  {year: '2004','类型 A':25.0 ,'类型 B':14 ,'类型 C': 7},
-  {year: '2005','类型 A':24.0 ,'类型 B':13 ,'类型 C': 8},
-  {year: '2006','类型 A':24.0 ,'类型 B':14 ,'类型 C': 7},
-  {year: '2007','类型 A':26.0 ,'类型 B':16 ,'类型 C': 7},
-  {year: '2008','类型 A':26.0 ,'类型 B':15.2 ,'类型 C': 8},
-  {year: '2009','类型 A':27.1 ,'类型 B':15.2 ,'类型 C': 10},
-  {year: '2010','类型 A':27.5 ,'类型 B':15.4 ,'类型 C': 8},
-  {year: '2011','类型 A':26.4 ,'类型 B':15.2 ,'类型 C': 9},
-  {year: '2012','类型 A':28.8 ,'类型 B':15.4 ,'类型 C': 9},
-  {year: '2013','类型 A':33.3 ,'类型 B':16.7 ,'类型 C': 12},
-  {year: '2014','类型 A':38.2 ,'类型 B':19.5 ,'类型 C': 18}
-];
-
-const dv = new DataSet.View().source(data).transform({
-  type: 'fold',
-  fields: ['类型 A', '类型 B', '类型 C'],
-  key: '难民类型',
-  value: 'count',
-  remains: 'year'
-});
-
-const stackInterval1Opts = {
-  position: 'year*count',
-  color: '难民类型',
-  style: {
-    lineWidth: 1,
-    stroke: '#fff'
+  const data = [[0, 0, 10], [0, 1, 19], [0, 2, 8], [0, 3, 24], [0, 4, 67], [1, 0, 92], [1, 1, 58], [1, 2, 78], [1, 3, 117], [1, 4, 48], [2, 0, 35], [2, 1, 15], [2, 2, 123], [2, 3, 64], [2, 4, 52], [3, 0, 72], [3, 1, 132], [3, 2, 114], [3, 3, 19], [3, 4, 16], [4, 0, 38], [4, 1, 5], [4, 2, 8], [4, 3, 117], [4, 4, 115], [5, 0, 88], [5, 1, 32], [5, 2, 12], [5, 3, 6], [5, 4, 120], [6, 0, 13], [6, 1, 44], [6, 2, 88], [6, 3, 98], [6, 4, 96], [7, 0, 31], [7, 1, 1], [7, 2, 82], [7, 3, 32], [7, 4, 30], [8, 0, 85], [8, 1, 97], [8, 2, 123], [8, 3, 64], [8, 4, 84], [9, 0, 47], [9, 1, 114], [9, 2, 31], [9, 3, 48], [9, 4, 91]];
+  let source = [];
+  for (let i = 0; i < data.length; i++) {
+    let item = data[i];
+    let obj = {};
+    obj.name = item[0];
+    obj.day = item[1];
+    obj.sales = item[2];
+    source.push(obj);
   }
-};
+  const scale = [
+    {
+      dataKey: 'name',
+      type: 'cat',
+      values: ['Alexander', 'Marie', 'Maximilian', 'Sophia', 'Lukas', 'Maria', 'Leon', 'Anna', 'Tim', 'Laura']
+    },
+    {
+      dataKey: 'day',
+      type: 'cat',
+      values: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+    }
+  ];
 
-export default {
-  data() {
-    return {
-      height: 400,
-      dv,
-      stackInterval1Opts,
-    };
-  }
-};
+  export default {
+    data() {
+      return {
+        source,
+        scale,
+        height: 400,
+        padding: 80,
+        gridy: {
+          align: 'center',
+          lineStyle: {
+            lineWidth: 1,
+            lineDash: null,
+            stroke: '#f0f0f0'
+          }
+        },
+        gridx: {
+          align: 'center',
+          lineStyle: {
+            lineWidth: 1,
+            lineDash: null,
+            stroke: '#f0f0f0'
+          }
+        },
+        color: ['sales', '#BAE7FF-#1890FF-#0050B3'],
+        style: {
+          lineWidth: 1,
+          stroke: '#fff'
+        },
+        brushStyle: {
+          lineWidth: 1,
+          stroke: '#999',
+          fill: '#999',
+          fillOpacity: 0.3
+        }
+      };
+    }
+  };
 </script>
