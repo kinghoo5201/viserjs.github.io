@@ -9,11 +9,7 @@
     "build": "rm -rf ./build && NODE_ENV=production webpack --mode development",
     "publish": "npm run build || true && git add . && git commit -m 'publish viserjs.github.io' && git push origin master"
   },
-  "pre-commit": [
-    "tslint"
-  ],
   "dependencies": {
-    "@ali/oneui-canary": "^2.3.2",
     "@alife/oui-button": "^2.0.13",
     "@alife/oui-icon": "^2.0.26",
     "@alife/oui-modal": "^2.0.13",
@@ -31,14 +27,14 @@
     "oui-dom-utils": "^0.3.8",
     "react-color": "^2.14.1",
     "react-redux": "^5.0.7",
-    "viser": "^2.3.0",
+    "viser": "^2.4.0",
     "viser-graph": "^0.1.7",
     "viser-graph-ng": "^0.1.10",
     "viser-graph-react": "^0.1.11",
     "viser-graph-vue": "^0.1.10",
-    "viser-ng": "^2.3.3",
-    "viser-react": "^2.3.4",
-    "viser-vue": "^2.3.3"
+    "viser-ng": "^2.4.0",
+    "viser-react": "^2.4.0",
+    "viser-vue": "^2.4.0"
   },
   "devDependencies": {
     "@angular/common": "^5.0.5",

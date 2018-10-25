@@ -5,6 +5,21 @@ const examples = {
       cnName: '组件使用',
       examples: [
         {
+          path: 'example7',
+          enName: 'tooltip mini',
+          cnName: 'tooltip mini',
+        },
+        {
+          path: 'example8',
+          enName: 'legend page',
+          cnName: 'legend-翻页',
+        },
+        {
+          path: 'example9',
+          enName: 'legend-html',
+          cnName: 'legend-html',
+        },
+        {
           path: 'example1',
           enName: 'special data and range mark',
           cnName: '特殊数据点标注和特殊数据区间标注',
@@ -33,6 +48,17 @@ const examples = {
           path: 'example6',
           enName: 'tail legend',
           cnName: '尾部跟随图例',
+        },
+      ],
+    },
+    bestCase: {
+      enName: 'bestCase',
+      cnName: '精选案例',
+      examples: [
+        {
+          path: 'example3',
+          enName: 'Yan Bao 7-day annualized rate of return',
+          cnName: '余额宝七日年化收益率',
         },
       ],
     },
