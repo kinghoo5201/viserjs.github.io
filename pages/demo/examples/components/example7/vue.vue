@@ -1,54 +1,37 @@
 <template>
   <div>
-    <v-chart forceFit height="400" :data="data" :scale="scale">
-      <v-legend />
-      <v-tooltip
-        :crosshairs="{
-          type: 'line',
+    <v-chart :forceFit="true" :height="height" :data="data" :scale="scale">
+      <v-tooltip type="mini"></v-tooltip>
+      <v-axis
+        dataKey="count"
+        :label="{
+          offset:[-10,10]
         }"
-        :useHtml="false"
-      />
-      <v-stack-area position="year*value" color="country" />
-      <v-stack-line position="year*value" color="country" />
+      ></v-axis>
+      <v-interval 
+        position="release*count"
+        color="#1890ff"
+        :opacity="0.96"
+      ></v-interval>
     </v-chart>
   </div>
 </template>
 
 <script>
+import * as $ from 'jquery';
 const DataSet = require('@antv/data-set');
 
 const scale = [
   {
-    dataKey: 'data',
-    tickCount: 10
+    dataKey: 'count',
+    alias: 'top2000 唱片总量',
   },
   {
-    dataKey: 'minTemp',
-    max: 30,
-    min: 0
-  },
-  {
-    dataKey: 'maxTemp',
-    max: 30,
-    min: 0
+    dataKey: 'release',
+    tickInterval: 5,
+    alias: '唱片发行年份',
   },
 ];
-
-const htmlContent = (title, items) => {
-  var data = items[0].point._origin;
-  var titleDom = '<div class ="custom-tooltip-title">' + data.data + '</div>';
-  var tempDom = '<div class = "custom-tooltip-value">' + '<div class = "custom-tooltip-temp"><span>低温</span>' + data.minTemp + '</div>' + '<div class = "custom-tooltip-temp"><span>高温</span>' + data.maxTemp + '</div>' + '</div>';
-  var windDom = '<div class = "custom-tooltip-wind">风向:' + data.windDir + ',  风速:' + data.windSpeed + '</div>';
-  var domClass = void 0;
-  if (data.rain === true) {
-    domClass = ' rain';
-  } else if (data.sunny === true) {
-    domClass = ' sun';
-  } else {
-    domClass = ' cloud';
-  }
-  return '<div class="custom-tooltip' + domClass + '">' + titleDom + tempDom + windDom + '</div>';
-}
 
 export default {
   mounted() {
