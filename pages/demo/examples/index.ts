@@ -5,6 +5,11 @@ const examples = {
       cnName: '组件使用',
       examples: [
         {
+          path: 'example10',
+          enName: 'axis-label-offset',
+          cnName: 'axis-label offset 配置',
+        },
+        {
           path: 'example7',
           enName: 'tooltip mini',
           cnName: 'tooltip mini',
@@ -43,6 +48,11 @@ const examples = {
           path: 'example5',
           enName: 'realtime area color',
           cnName: '实时数据应用区域着色',
+        },
+        {
+          path: 'example11',
+          enName: 'label-map',
+          cnName: 'label-地图',
         },
         {
           path: 'example6',
