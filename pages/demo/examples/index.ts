@@ -428,7 +428,7 @@ const examples = {
       examples: [
         {
           path: 'example1',
-          enName: 'Bubble map',
+          enName: 'Bubble Map',
           cnName: '带气泡的地图',
         },
         {
@@ -615,6 +615,11 @@ const examples = {
           cnName: '区域图（存在空值）',
         },
         {
+          path: 'example4',
+          enName: 'rain-flow-relation',
+          cnName: '雨流量关系图',
+        },
+        {
           path: 'example5',
           enName: 'area-range-line',
           cnName: '范围区域图与线图',
@@ -675,6 +680,11 @@ const examples = {
           cnName: '带图片遮罩的词云',
         },
         {
+          path: 'example17',
+          enName: 'Polor Grouping Stacked Bar',
+          cnName: '极坐标系下分组层叠柱状图',
+        },
+        {
           path: 'example18',
           enName: 'Daily Life Visualization',
           cnName: '日常作息可视化',
@@ -684,6 +694,26 @@ const examples = {
           enName: 'Grouping stacked histograms',
           cnName: '分组层叠柱状图',
         },
+        {
+          path: 'example22',
+          enName: 'Error-Bar',
+          cnName: '柱状图-ErrorBar',
+        },
+        {
+          path: 'example23',
+          enName: 'custom-Bar',
+          cnName: '自定义柱状图',
+        },
+        {
+          path: 'example24',
+          enName: 'marked-Bar',
+          cnName: '带标识的柱状图',
+        },
+        // {
+        //   path: 'example25',
+        //   enName: 'marked-percentage-stacked-Bar',
+        //   cnName: '带标识的百分比堆叠条形图',
+        // },
         {
           path: 'example26',
           enName: 'bar with round corner',
@@ -919,6 +949,11 @@ const examples = {
           path: 'example81',
           enName: 'Waffle',
           cnName: '华夫图',
+        },
+        {
+          path: 'example82',
+          enName: 'Waffle2',
+          cnName: '华夫图2',
         },
         {
           path: 'example83',
