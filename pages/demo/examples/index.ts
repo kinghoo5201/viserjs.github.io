@@ -412,11 +412,16 @@ const examples = {
         },
         {
           path: 'example5',
+          enName: 'hex-choropleth-map',
+          cnName: '六边形分箱示意地图',
+        },
+        {
+          path: 'example6',
           enName: 'route maps at airports in us',
           cnName: '美国各个机场的航线图',
         },
         {
-          path: 'example6',
+          path: 'example7',
           enName: 'Map with heatmap',
           cnName: '带热力图的地图',
         },
@@ -491,6 +496,11 @@ const examples = {
         },
         {
           path: 'example9',
+          enName: 'Mirror Facet-transpose',
+          cnName: '镜像分面(转置)',
+        },
+        {
+          path: 'example10',
           enName: 'Matrix Facet',
           cnName: '矩阵分面',
         },
@@ -578,11 +588,11 @@ const examples = {
           enName: 'area-null',
           cnName: '区域图（存在空值）',
         },
-        {
-          path: 'example4',
-          enName: 'rain-flow-relation',
-          cnName: '雨流量关系图',
-        },
+        // {
+        //   path: 'example4',
+        //   enName: 'rain-flow-relation',
+        //   cnName: '雨流量关系图',
+        // },
         {
           path: 'example5',
           enName: 'area-range-line',
@@ -673,11 +683,11 @@ const examples = {
           enName: 'marked-Bar',
           cnName: '带标识的柱状图',
         },
-        // {
-        //   path: 'example25',
-        //   enName: 'marked-percentage-stacked-Bar',
-        //   cnName: '带标识的百分比堆叠条形图',
-        // },
+        {
+          path: 'example25',
+          enName: 'marked-percentage-stacked-Bar',
+          cnName: '带标识的百分比堆叠条形图',
+        },
         {
           path: 'example26',
           enName: 'bar with round corner',
@@ -697,6 +707,31 @@ const examples = {
           path: 'example29',
           enName: 'Double Axes',
           cnName: '双轴图表',
+        },
+        // {
+        //   path: 'example30',
+        //   enName: 'Geographic mapping',
+        //   cnName: '地理映射',
+        // },
+        {
+          path: 'example31',
+          enName: 'waffle-path',
+          cnName: '符号华夫图',
+        },
+        {
+          path: 'example32',
+          enName: 'hexbin-size',
+          cnName: '六边形大小分箱图',
+        },
+        {
+          path: 'example33',
+          enName: 'waffle-image',
+          cnName: '图片华夫图',
+        },
+        {
+          path: 'example34',
+          enName: 'voronoi-polar',
+          cnName: '极坐标voronoi图',
         },
         {
           path: 'example36',

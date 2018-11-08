@@ -6,168 +6,97 @@ import { ViserModule } from 'viser-ng';
 import * as $ from 'jquery';
 const DataSet = require('@antv/data-set');
 
-const scale = [{
-  dataKey: 'longitude',
-  max: -66,
-  min:-125,
-  sync: true
-}, {
-  dataKey: 'latitude',
-  max: 50,
-  min:24,
-  sync: true
-}];
-
 @Component({
   selector: '#mount',
   template: `
   <div>
-    <v-chart [forceFit]="forceFit" [height]="height" [padding]="0" [scale]="scale"
-     [onPlotMove]="plotMove" [onPlotLeave]="plotLeave"
-    >
-      <v-tooltip [showTitle]="false"></v-tooltip>
-      <v-legend data-key="trend" position="left"></v-legend>
-      <v-view [data]="mapDv">
-        <v-polygon [position]="'longitude*latitude'" [style]="{
-            fill: '#DDDDDD',
-            stroke: '#b1b1b1',
-            lineWidth: 0.5,
-            fillOpacity: 0.85
-        }"></v-polygon>
+    <v-chart [forceFit]="forceFit" [height]="height" [padding]="padding" [scale]="scale">
+      <v-tooltip></v-tooltip>
+      <v-view [data]="geoDv">
+        <v-polygon position="longitude*latitude" color="grey" [opacity]="0.5"></v-polygon>
       </v-view>
-      <v-view [data]="airports">
-        <v-point [position]="'longitude*latitude'" shape="circle" [color]="'rgb(97,145,185)'"
-          [style]="{
-            stroke: '#eee',
-            lineWidth: 1
-        }" [size]="['count', [ 3, 18 ]]" tooltip="iata*count"></v-point>
-      </v-view>
-      <v-view [data]="subFlights">
-        <v-tooltip [showTitle]="false"></v-tooltip>
-        <v-edge [position]="'longitude*latitude'"></v-edge>
+      <v-view [data]="userDv">
+        <v-polygon position="longitude*latitude" [color]="color"
+          [style]="style"
+        ></v-polygon>
       </v-view>
     </v-chart>
   </div>
   `
 })
-
 class AppComponent {
   forceFit: boolean = true;
-  height: number = 400;
-  scale = scale;
-  mapDv = [];
-  airports = [];
-  subFlights = [];
-  flights = [];
-  preId = '';
-  airView = '';
-  plotMove = (ev, chart) => {
-    if (chart && chart._attrs && (chart._attrs.views.length === 3)) {
-      const airView = chart._attrs.views[1];
-      const flightView = chart._attrs.views[2];
-      var preId = this.preId;
-      var records = airView.getSnapRecords({
-          x: ev.x,
-          y: ev.y
-      });
-      var subFlights = [];
-      if (records.length) {
-          var obj = records[0]._origin;
-          var iata = obj.iata;
-          if (preId !== iata) {
-              subFlights = this.getFlights(iata);
-              flightView.changeData(subFlights);
-              preId = iata;
-          }
-      }
-      this.preId = preId;
-      this.subFlights = subFlights;
+  height: number = 500;
+  padding = [0];
+  geoDv = [];
+  userDv = [];
+  color = ['count', '#BAE7FF-#1890FF-#0050B3'];
+  style = {
+    stroke: 'white',
+    lineWidth: 10
+  };
+  scale = [{
+    dataKey: 'latitude',
+    nice: false,
+    sync: true
+  }, {
+    dataKey: 'longitude',
+    nice: false,
+    sync: true
+  }];
+  addPoint = function(collection, point, other) {
+    let count = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 1;
+
+    for (let i = 0; i < count; i++) {
+      collection.push(point);
     }
   };
-  plotLeave = (ev, chart) => {
-    if (chart && chart._attrs && (chart._attrs.views.length === 3)) {
-      const subFlights = this.subFlights;
-      const flightView = chart._attrs.views[2];
-      if (subFlights.length) {
-        this.subFlights = [];
-        flightView.changeData([]);
-      }
+  getCount = function(x, y, medianX, medianY) {
+    let distance = Math.pow(x - medianX, 2) + Math.pow(y - medianY, 2);
+    if (distance < 4) {
+      return 3;
+    } else if (distance < 16) {
+      return 3;
+    } else if (distance < 64) {
+      return 2;
     }
-  };
-
-  constructor() {
-    $.when($.getJSON('/assets/data/usa.geo.json'),
-      $.getJSON('/assets/data/flights-airport.json'),
-      $.getJSON('/assets/data/airport.json'))
-    .then((mapData, flights, airports) => {
-      mapData = mapData[0];
-      flights = flights[0];
-      airports = airports[0];
-
-      var map = [];
-      var features = mapData.features;
-      // 获取出所有的地图区域名称
-      for (var i = 0; i < features.length; i++) {
-          var name = features[i].properties.name;
-          map.push({
-              "name": name
-          });
-      }
-
-      var mapDv = new DataSet.View().source(mapData, {
-          type: 'GeoJSON'
-      });
-      mapDv.transform({
-          type: 'map',
-          callback: function(row) {
-              row.code = row.properties.code;
-              return row;
-          }
-      });
-
-      var countByAirport = {};
-      var subFlights = [];
-      // 计算飞机的起飞、降落数
-      flights.forEach(function (flight) {
-          var origin = flight.origin,
-              destination = flight.destination;
-          countByAirport[origin] = (countByAirport[origin] || 0) + 1;
-          countByAirport[destination] = (countByAirport[destination] || 0) + 1;
-      });
-
-      // Only consider airports with at least one flight.
-      var airportByIata = {};
-      airports = airports.filter(function (airport) {
-          airportByIata[airport.iata] = airport;
-          if (countByAirport[airport.iata]) {
-              airport.count = countByAirport[airport.iata]; // 加入班次数量
-              airport.id = airport.iata;
-              return true;
-          }
-      });
-      flights.forEach(function(flight) {
-          var origin = airportByIata[flight.origin];
-          var destination = airportByIata[flight.destination];
-          flight.longitude = [origin.longitude, destination.longitude];
-          flight.latitude = [origin.latitude, destination.latitude];
-      });
-
-      this.mapDv = mapDv;
-      this.airports = airports;
-      this.subFlights = subFlights;
-      this.flights = flights;
-    });
+    return 1;
   }
 
-  getFlights(iata) {
-    const flights = this.flights;
-    var rst = [];
-    flights.forEach(function (flight) {
-        if (flight.origin === iata || flight.destination === iata) {
-            rst.push(flight);
+  constructor() {
+    $.getJSON('/assets/data/china-provinces.geo.json', (data) => {
+      const geoDv = new DataSet.View().source(data, {
+        type: 'GeoJSON'
+      });
+      const ranges = {
+        lat: geoDv.range('latitude'),
+        lon: geoDv.range('longitude')
+      };
+      const medians = {
+        lat: geoDv.median('latitude'),
+        lon: geoDv.median('longitude')
+      };
+      const userData = [];
+      for (let lon = ranges.lon[0]; lon <= ranges.lon[1]; lon += .5) {
+        for (let lat = ranges.lat[0]; lat <= ranges.lat[1]; lat += .5) {
+          if (geoDv.geoContains(data, [lon, lat])) {
+            this.addPoint(userData, {
+              latitude: lat,
+              longitude: lon
+            }, this.getCount(lon, lat, medians.lon, medians.lat));
+          }
         }
+      }
+      const userDv = new DataSet.View().source(userData).transform({
+        // sizeByCount: true,
+        type: 'bin.hexagon',
+        fields: ['longitude', 'latitude'],
+        binWidth: [2, 3],
+        as: ['longitude', 'latitude', 'count']
+      });
+      this.geoDv = geoDv;
+      this.userDv = userDv;
     });
-    return rst;
   }
 }
 

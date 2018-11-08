@@ -118,7 +118,7 @@ export default class App extends React.Component {
           <Tooltip />
         </Chart>
         <Plugin>
-          <Slider {...sliderOpts}/>
+          {/* <Slider {...sliderOpts}/> */}
         </Plugin>
       </div>
     );
